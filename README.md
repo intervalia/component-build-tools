@@ -39,10 +39,10 @@ There are 5 build styles:
 
 | Build Style | Description |
 | --- | --- |
-| IIFE | IFFE styled output with no transpiling |
-| IIFE5 | IFFE output with ES5 transpile operation |
+| IIFE | IFFE styled output with no transpiling. |
+| IIFE5 | IFFE output with ES5 transpile operation. For compatibility with older ES5 browsers. |
 | CJS | Common JS output. Load by using `require` |
-| CJS5 | Common JS output with ES5 transpile. Load by using `require` |
+| CJS5 | Common JS output with ES5 transpile. Load by using `require`. For compatibility with older ES5 browsers. |
 | MJS | ES6 Module output. Load by using `import` |
 
 ### Config options
@@ -65,8 +65,14 @@ When you call `rollup.init` you pass in a set of options. Most are optional. The
 | srcFileName | string | `undefined` | If undefined then we use the folder name to specify the source file name. Otherwise the `srcFileName` string is used.<br/>_See [`srcFileName`](#srcFileName) below._ |
 | srcFolders | array | `[]` | Which folders to look into for source files.<br/>**This is required**<br/>_See [`srcFolders`](#srcFolders) below._ |
 | tagMissingStrings | bool | `true` | When `true` Mark missing locale strings so they are easily seen
-| templateFiles | array | `['*.html']` | |
-| tempLocalesName | string | `'locales.mjs'` | |
-| tempPath | string | `'./_compiled/'` | |
-| tempTemplateName | string | `'templates.mjs'` | |
-| useStrict | bool | `false` | |
+| templateFiles | array | `['*.html']` | A globby array of files to include as templates. |
+| tempLocalesName | string | `'locales.mjs'` | The filename used for the compiled `locales` file. |
+| tempPath | string | `'./_compiled/'` | The path into which all compiled files are place. |
+| tempTemplateName | string | `'templates.mjs'` | The filename used for the compiled `templates` file. |
+| useStrict | bool | `false` | If `true` then add `"use strict"` at the top of the rolled up output files. |
+
+
+#### srcFileName
+
+If `srcFileName` is left as `undefined` then the 
+

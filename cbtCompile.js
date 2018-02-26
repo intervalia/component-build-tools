@@ -330,23 +330,23 @@ function generateMultipleTemplates(rootFolder, templateFiles, config, localeList
   */
 }
 
-function generateTemplateOutput(rootFolder, templateFiles, config) {
+function oldgenerateTemplateOutput(rootFolder, templateFiles, config) {
   var outputStr = `// This is an auto generated file. Do not edit!
-import locales from './${config.tempLocalesName}';
-const lang = locales();
-const templates = {};
+  import locales from './${config.tempLocalesName}';
+  const lang = locales();
+  const templates = {};
 
-const getter = str => {
-  var el = document.createElement('template');
-  el.innerHTML = str;
+  const getter = str => {
+    var el = document.createElement('template');
+    el.innerHTML = str;
 
-  return {
-    value: el.content.cloneNode(true)
+    return {
+      value: el.content.cloneNode(true)
+    };
   };
-};
 
-Object.defineProperties(templates, {
-`;
+  Object.defineProperties(templates, {
+  `;
 
   const len = templateFiles.length - 2;
   outputStr = templateFiles.reduce(
@@ -371,7 +371,60 @@ Object.defineProperties(templates, {
     }, outputStr
   ) + `});
 
-export default templates;
+  export default templates;
+  `;
+
+  return outputStr;
+}
+
+function generateTemplateOutput(rootFolder, templateFiles, config) {
+  var outputStr = `// This is an auto generated file. Do not edit!
+import locales from './${config.tempLocalesName}';
+const lang = locales();
+
+function dom(key, data) {
+  var el = document.createElement('template');
+  el.innerHTML = str(key, data);
+  return el.content;
+}
+
+function str(key, data) {
+  switch(key) {
+`;
+
+  const len = templateFiles.length - 2;
+  outputStr = templateFiles.reduce(
+    (str, filePath, i) => {
+      let templateStr = readFile(filePath);
+      if (config.minTempalteWS) {
+        templateStr = templateStr.replace(MULTI_WS_RE, ' ');
+      }
+      let ext = path.extname(filePath);
+      let templateKey = path.basename(filePath, ext);
+      if (!VALID_TEMPLATE_KEY_TEST_RE.test(templateKey)) {
+        throw new Error(`Invalid Template name: ${filePath}\nTemplate file names can only use $, _ or alphanumeric characters.`);
+      }
+
+      //let comma = i > len ? '' : ',';
+      let tempPath = filePath.replace(rootFolder, '');
+
+      str += `
+    // Included template file: .${tempPath}
+    case '${templateKey}':
+      return `${templateStr}\`;
+      break;
+
+`;
+
+      return str;
+    }, outputStr
+  ) + `    default:
+      return '';
+      break;
+  }
+}
+
+export default {dom, str};
 `;
 
   return outputStr;
