@@ -389,7 +389,7 @@ function dom(key, data) {
 }
 
 function str(key, data) {
-  switch(key) {
+  switch (key) {
 `;
 
   const len = templateFiles.length - 2;
@@ -412,7 +412,6 @@ function str(key, data) {
     // Included template file: .${tempPath}
     case '${templateKey}':
       return \`${templateStr}\`;
-      break;
 
 `;
 
@@ -420,7 +419,6 @@ function str(key, data) {
     }, outputStr
   ) + `    default:
       return '';
-      break;
   }
 }
 
