@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/intervalia/component-build-tools/issues"
   },
-  "homepage": "https://github.com/intervalia/component-build-tools#readme"
+  "homepage": "https://github.com/intervalia/component-build-tools#readme",
+  "dependencies": {
+    "rollup-plugin-buble": "^0.19.2",
+    "rollup-plugin-uglify-es": "0.0.1"
+  }
 }

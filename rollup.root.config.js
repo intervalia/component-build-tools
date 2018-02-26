@@ -1,6 +1,6 @@
 /* eslint brace-style: 0, spaced-comment: 0, no-multi-spaces: 0 */
 const fs = require('fs');
-const fscompile = require('./fscompile');
+const cbtCompile = require('./cbtCompile');
 const glob = require('glob');
 const path = require('path');
 const PLUGIN_BUBLE = require('rollup-plugin-buble')({ transforms: { dangerousTaggedTemplateString: true } });
@@ -57,7 +57,7 @@ function init(theirConfig = {}) {
             let localeList = [];
             let componentPath = path.join(srcRoot, tempPath);
             // TODO: If we are compiling for each locale then we need to repeat the `srcList.push`
-            let localeCode = fscompile.locales(componentPath, config);
+            let localeCode = cbtCompile.locales(componentPath, config);
             if (typeof localeCode === 'object') {
               localeList = Object.keys(localeCode);
               localeList.forEach(
@@ -70,7 +70,7 @@ function init(theirConfig = {}) {
               writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName), localeCode);
             }
 
-            let templateCode = fscompile.templates(componentPath, config, localeList);
+            let templateCode = cbtCompile.templates(componentPath, config, localeList);
             writeFile(path.join(componentPath, config.tempPath, config.tempTemplateName), templateCode);
           }
         }
