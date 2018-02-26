@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/intervalia/component-build-tools#readme",
   "dependencies": {
+    "glob": "^7.1.2",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-uglify-es": "0.0.1"
   }
