@@ -33,7 +33,7 @@ function init(theirConfig = {}) {
     //srcFileName: 'wc.*.mjs',
     srcFolders: [], // Where to look for source files. User must supply this
     tagMissingStrings: true, // Mark missing locale strings so they are easily seen
-    templatefiles: ['*.html'],
+    templateFiles: ['*.html'],
     tempLocalesName: 'locales.mjs',
     tempPath: './_compiled/',
     tempTemplateName: 'templates.mjs',
@@ -61,6 +61,7 @@ function init(theirConfig = {}) {
             let componentPath = path.join(srcRoot, tempPath);
             // TODO: If we are compiling for each locale then we need to repeat the `srcList.push`
             let localeCode = cbtCompile.locales(componentPath, config);
+            // TODO: Handle what happens if `localeCode` is false
             if (typeof localeCode === 'object') {
               localeList = Object.keys(localeCode);
               localeList.forEach(
@@ -74,6 +75,7 @@ function init(theirConfig = {}) {
             }
 
             let templateCode = cbtCompile.templates(componentPath, config, localeList);
+            // TODO: Handle what happens if `templateCode` is false
             writeFile(path.join(componentPath, config.tempPath, config.tempTemplateName), templateCode);
           }
         }

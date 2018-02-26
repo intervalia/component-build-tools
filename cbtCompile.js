@@ -57,7 +57,7 @@ function locales(rootFolder, config) {
   }
   else {
     // Indicate that no files were found
-    return null;
+    return false;
   }
 }
 
@@ -67,7 +67,7 @@ function locales(rootFolder, config) {
  */
 function templates(rootFolder, config, localeList) {
   // Convert the list of globby template filenames into a list of available filenames
-  const templateFileArray = getFileArrayFromGlob(rootFolder, config.templatefiles);
+  const templateFileArray = getFileArrayFromGlob(rootFolder, config.templateFiles);
 
   if (templateFileArray.length > 0) {
     // If we have a list of template files then process them
@@ -87,7 +87,7 @@ function templates(rootFolder, config, localeList) {
   }
   else {
     // Indicate that no template files were found
-    return null;
+    return false;
   }
 }
 

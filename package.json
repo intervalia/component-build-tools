@@ -2,7 +2,7 @@
   "name": "component-build-tools",
   "version": "1.0.0",
   "description": "A set of build tools to simplify the creation of components",
-  "main": "index.js",
+  "main": "rollup.root.config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
