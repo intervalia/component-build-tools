@@ -36,7 +36,8 @@ function init(theirConfig = {}) {
     templatefiles: ['*.html'],
     tempLocalesName: 'locales.mjs',
     tempPath: './_compiled/',
-    tempTemplateName: 'templates.mjs'
+    tempTemplateName: 'templates.mjs',
+    useStrict: false
   }, theirConfig);
 
   config.srcFolders.forEach(
@@ -131,6 +132,7 @@ function init(theirConfig = {}) {
                   file,
                   format,
                   name: varName
+                  strict: config.useStrict || false
                 }
               };
 
