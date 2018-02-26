@@ -411,7 +411,7 @@ function str(key, data) {
       str += `
     // Included template file: .${tempPath}
     case '${templateKey}':
-      return `${templateStr}\`;
+      return \`${templateStr}\`;
       break;
 
 `;
