@@ -131,7 +131,7 @@ function init(theirConfig = {}) {
                 output: {
                   file,
                   format,
-                  name: varName
+                  name: varName,
                   strict: config.useStrict || false
                 }
               };
