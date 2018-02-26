@@ -27,7 +27,7 @@ function init(theirConfig = {}) {
     distPath: 'dist/js', // Path into which the distribution files will be placed
     includePath: true, // Place the dist files inside their folder
     localeFiles: ['locales/strings_*.json'],
-    makeMinFiles: true,
+    makeMinFiles: false,
     minTempalteWS: true, // Minimize the white space for templates
     separateByLocale: false,
     //srcFileName: 'wc.*.mjs',
