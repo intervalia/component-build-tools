@@ -22,10 +22,12 @@ function init(theirConfig = {}) {
     addEOLocale: true, // Add the EO locale if it does not exist
     alwaysReturnFile: true,
     buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.IIFE ],
+    debug: false,
     defaultLocale: 'en',
     distPath: 'dist/js', // Path into which the distribution files will be placed
     includePath: true, // Place the dist files inside their folder
     localeFiles: ['locales/strings_*.json'],
+    makeMinFiles: true,
     minTempalteWS: true, // Minimize the white space for templates
     separateByLocale: false,
     //srcFileName: 'wc.*.mjs',
@@ -137,16 +139,17 @@ function init(theirConfig = {}) {
               }
               rollupOptionsArray.push(buildItem);
 
-              // TODO: Add option to allow or stop minify
-              const buildItem2 = Object.assign({}, buildItem);
-              buildItem2.plugins = [];
-              if (transpile) {
-                buildItem2.plugins.push(PLUGIN_BUBLE);
+              if (config.makeMinFiles) {
+                const buildItem2 = Object.assign({}, buildItem);
+                buildItem2.plugins = [];
+                if (transpile) {
+                  buildItem2.plugins.push(PLUGIN_BUBLE);
+                }
+                buildItem2.plugins.push(PLUGIN_UGLIFY);
+                buildItem2.output = Object.assign({}, buildItem.output);
+                buildItem2.output.file = buildItem.output.file.replace(/(.[a-z]{2,3}$)/, '.min$1');
+                rollupOptionsArray.push(buildItem2);
               }
-              buildItem2.plugins.push(PLUGIN_UGLIFY);
-              buildItem2.output = Object.assign({}, buildItem.output);
-              buildItem2.output.file = buildItem.output.file.replace(/(.[a-z]{2,3}$)/, '.min$1');
-              rollupOptionsArray.push(buildItem2);
             }
           );
         }
