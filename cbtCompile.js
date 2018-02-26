@@ -389,8 +389,7 @@ function dom(key, data) {
 }
 
 function str(key, data) {
-  switch (key) {
-`;
+  switch (key) {`;
 
   const len = templateFiles.length - 2;
   outputStr = templateFiles.reduce(
@@ -412,12 +411,12 @@ function str(key, data) {
     // Included template file: .${tempPath}
     case '${templateKey}':
       return \`${templateStr}\`;
-
 `;
 
       return str;
     }, outputStr
-  ) + `    default:
+  ) + `
+    default:
       return '';
   }
 }
