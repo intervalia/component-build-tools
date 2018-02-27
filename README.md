@@ -1,6 +1,10 @@
 # component-build-tools
 A set of build tools to help in the creation of components
 
+Used with [rollup](https://www.npmjs.com/package/rollup), these tools will allow you to process locale file and template files into a set of `.mjs` files that are importable in your script files.
+
+For those of you that have used [gulp-component-assembler](https://www.npmjs.com/package/gulp-component-assembler) these tools allow similar functionality but by using ES6 imports instead of defining the component through an `assembly.json` file.
+
 ## Install
 
 You need to install the component build tools in your project:
@@ -19,8 +23,8 @@ Here is a sample `rollup.config.js` file:
 const rollup = require('./node_modules/component-build-tools/rollup.root.config');
 
 const config = {
-  buildTypes: [ rollup.BUILD_TYPES.MJS, rollup.BUILD_TYPES.IIFE, rollup.BUILD_TYPES.CJS ], // Set this to any build styles you want.
-  srcFolders: ['assets/wc-n1', 'assets/wc-p3'] // Set this to any folder you want to have rollup up
+  buildTypes: [ rollup.BUILD_TYPES.MJS ], // Set this to any build styles you want.
+  srcFolders: ['assets/wc-n1', 'assets/wc-p3'] // Set this to any folder you want to have rollup process
 };
 
 module.exports = rollup.init(config);
@@ -74,5 +78,53 @@ When you call `rollup.init` you pass in a set of options. Most are optional. The
 
 #### srcFileName
 
-If `srcFileName` is left as `undefined` then the 
+If `srcFileName` is left as `undefined` then the name of the source files will be the same name as the folder with the extension of `.mjs`.
+
+For example, the file structure below shows a folder named `test1` and within it is a file named `test1.mjs`. The build process of the build tools will take `test1.mjs` as the root file to use in the rollup config file.
+
+```
++- components
+   +- test1
+      +- test1.msj
+      +- style.html
+      +- content.html
+```
+
+And the default output file will be placed in:
+
+```
++- dist
+   +- js
+      +- test1
+         +- test1.mjs
+```
+
+The output file `./dist/js/test1/test1.mjs` will combine the two template files `style.html` and `content.html` as well as the source file `test1.js` as one set of code.
+
+If `srcFileName` were set to `index.mjs` then the build tools would use `index.msj` as the root file to use in the rollup config file.
+
+```
++- components
+   +- test1
+      +- index.msj
+      +- style.html
+      +- content.html
+```
+
+would still produce the same output structure of:
+
+```
++- dist
+   +- js
+      +- test1
+         +- test1.mjs
+```
+
+#### srcFolders
+
+`srcFolder` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
+
+If you have all of your components in the folder `./comps` then you would call `rollup.init({srcFolders:['./comps']})`.
+
+Every folder directly under `./comps` would get processed and the build tools and handed off to rollup.
 
