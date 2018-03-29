@@ -1,0 +1,15 @@
+#! /bin/bash
+# When we run on our dev machines this file is run on that machine
+# When we do a Pull Request this file is run on Travis-CI
+# Otherwise this is run on Electric Flow
+
+# fail fast
+set -o errexit
+set -o pipefail
+
+
+echo -e "\033[30m\033[104m*** Mocha Unit Tests ***\033[0m"
+./node_modules/.bin/nyc --nycrc-path ./test/.nycrc-server.json  ./node_modules/.bin/_mocha $(find test -name '*.test.js')
+DIR="$(dirname $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd))/reports/coverage/lcov-report/index.html"
+echo -e "\033[92mTo view the detailed coverage report, open this file in a browser:  \033[2m(right-click the path, then Services-->Reveal in Finder)\033[0m"
+echo -e "\033[94m${DIR}\033[0m"

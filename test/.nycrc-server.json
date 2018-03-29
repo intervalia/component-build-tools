@@ -1,0 +1,32 @@
+{
+  "all": true,
+  "branches": 40,
+  "cache": false,
+  "check-coverage": false,
+  "eager": true,
+  "exclude": [
+    "test/**/*.test.js"
+  ],
+  "extension": [],
+  "functions": 40,
+  "include": [
+    "cbtCompile.js",
+    "rollup.root.config.js"
+  ],
+  "instrument": true,
+  "lines": 40,
+  "per-file": true,
+  "report-dir": "reports/coverage",
+  "reporter": [
+    "lcov",
+    "text-summary"
+  ],
+  "require": [],
+  "statements": 80,
+  "watermarks": {
+    "lines": [80, 95],
+    "functions": [80, 95],
+    "branches": [80, 95],
+    "statements": [80, 95]
+  }
+}

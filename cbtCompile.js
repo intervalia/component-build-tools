@@ -41,6 +41,7 @@ function locales(rootFolder, config) {
 
   if (localeFileArray.length > 0) {
     // If we have a list of locale files then process them
+    // istanbul ignore if
     if (config.separateByLocale) {
       // Return the processed results as an object of strings.
       return createMultiLocaleFiles(rootFolder, localeFileArray, config);
@@ -71,19 +72,20 @@ function templates(rootFolder, config, localeList) {
 
   if (templateFileArray.length > 0) {
     // If we have a list of template files then process them
-    if (localeList.length > 0) {
+    // istanbul ignore if
+    if (Array.isArray(localeList) && localeList.length > 0) {
       // Return the processed results as a single string.
       return generateMultipleTemplates(rootFolder, templateFileArray, config, localeList);
     }
     else {
       // Return the processed results as a single string.
-      return generateTemplateOutput(rootFolder, templateFileArray, config);
+      return generateTemplateOutput(rootFolder, templateFileArray, config, !!localeList);
     }
   }
   else if (config.alwaysReturnFile) {
     // If we are supposed to always return a file then return the
     // default file contents as a string
-    return 'export default {};';
+    return `export default {dom:()=>null,str:()=>''};`;
   }
   else {
     // Indicate that no template files were found
@@ -116,6 +118,7 @@ function getFileArrayFromGlob(rootFolder, globList) {
       // no files returned
       if (!newList.length) {
         // don't pass the file to the process script if it's a glob tempPath
+        // istanbul ignore next
         if (!glob.hasMagic(tempPath)) {
           obj.push(tempPath);
         }
@@ -124,6 +127,7 @@ function getFileArrayFromGlob(rootFolder, globList) {
         newList.forEach(function(item) {
           item = path.resolve(rootFolder, item);
 
+          // istanbul ignore next
           if (obj.indexOf(item) === -1) {
             obj.push(item);
           }
@@ -140,42 +144,43 @@ function readTranslations(rootFolder, fileList, config) {
     (obj, filePath) => {
       let toks = filePath.match(LOCALE_RE);
       let lang = toks[1];
-      let fileContents = readFile(filePath);
-      if (config.minTempalteWS) {
-        // Simple minimize of the white space
-        fileContents = fileContents.replace(MULTI_WS_RE, ' ');
-      }
+      let fileContents = readFile(filePath).trim();
 
       var data;
       obj[`${lang}filePath`] = filePath.replace(rootFolder, ''); // Save the filename of this locale file
 
-      try {
-        data = JSON.parse(fileContents); // Convert the file JSON text into an object
-        obj[lang] = data; // Save the JSON
-        obj.langs.push(lang); // Indicate that we support this language
+      // istanbul ignore else
+      if (fileContents.length > 0) {
+        try {
+          data = JSON.parse(fileContents); // Convert the file JSON text into an object
+          obj[lang] = data; // Save the JSON
+          obj.langs.push(lang); // Indicate that we support this language
 
-        if (lang === config.defaultLocale) {
-          // If we are processing the default locale then save off the current set of keys.
-          obj.keys = Object.keys(data);
+          if (lang === config.defaultLocale) {
+            // If we are processing the default locale then save off the current set of keys.
+            obj.keys = Object.keys(data);
+          }
         }
-      }
-      catch (e) {
-        throw new Error(`Unable to parse locale file: ${filePath}:: ${e}`);
+        catch (e) {
+          throw new Error(`Unable to parse locale file: ${filePath}:: ${e}`);
+        }
       }
 
       return obj;
     }, {langs: []}
   );
 
-  if (config.addEOLocale && !translations.eo) {
-    // If we are adding EO and there was not EO file then generate a version of EO
-    translations.eo = createEOTranslations(translations[config.defaultLocale]); // Save the JSON
-    translations.langs.push('eo'); // Indicate that we support this language
-  }
-
   if (!translations.keys) {
     // If there was no locale file for the default locale then flag an error
     throw new Error(`locale file for default locale "${config.defaultLocale}" was not found.`);
+  }
+
+  // istanbul ignore else
+  if (config.addEOLocale && !translations.eo) {
+    // If we are adding EO and there was not EO file then generate a version of EO
+    translations.eo = createEOTranslations(translations[config.defaultLocale]); // Save the JSON
+    translations.eofilePath = ' * Auto Generated * .';
+    translations.langs.push('eo'); // Indicate that we support this language
   }
 
   return translations;
@@ -184,7 +189,10 @@ function readTranslations(rootFolder, fileList, config) {
 /*
  * Generate an array of locale file contents for every locale source file
  */
+ // istanbul ignore next
 function createMultiLocaleFiles(rootFolder, fileList, config) {
+  throw new Error('Not implamented yet.');
+  /*
   const contents = {};
 
   // Read all of the locale file
@@ -212,6 +220,7 @@ export default function () (${JSON.stringify(strings)});
   );
 
   return contents;
+  */
 }
 
 /*
@@ -246,14 +255,16 @@ function createSingleLocalesFile(rootFolder, fileList, config) {
     }, '{\n'
   ) + '}';
 
+  var keyLookup = (config.addKELocale ? `locale === 'ke' ? key : strs[locale][i]` : `strs[locale][i]`);
+
   return `// This is an auto generated file. Do not edit!
 const strCache = {};
 const strKeys = ${JSON.stringify(translations.keys)};
 const strs = ${strings};
 
-function getLocaleStrings(locale = window.locale) {
+function getLocaleStrings(locale = ${config.defaultLocaleVariable}) {
   // If the requested locale is not supported the use the default locale
-  if (!strs[locale]) {
+  if (!strs[locale]${config.addKELocale?"&&locale!=='ke'":""}) {
     locale = locale.split('-')[0];
     if (!strs[locale]) {
       locale = '${config.defaultLocale}';
@@ -262,7 +273,7 @@ function getLocaleStrings(locale = window.locale) {
 
   if (!strCache[locale]) {
     // If this locale isn't already in the cache, then create it and store it in the cache
-    strCache[locale] = strKeys.reduce((obj, key, i) => { obj[key] = locale === 'ke' ? key : strs[locale][i]; }, {});
+    strCache[locale] = strKeys.reduce((obj, key, i) => { obj[key] = ${keyLookup}; return obj; }, {});
   }
 
   // Return the cached language strings
@@ -273,6 +284,7 @@ export default getLocaleStrings;
 `;
 }
 
+// istanbul ignore next
 function generateMultipleTemplates(rootFolder, templateFiles, config, localeList) {
   throw new Error('Not implamented yet.');
   /*
@@ -306,7 +318,7 @@ function generateMultipleTemplates(rootFolder, templateFiles, config, localeList
           }
 
           const newFn = new Function();
-          if (config.minTempalteWS) {
+          if (config.minTemplateWS) {
             templateStr = templateStr.replace(MULTI_WS_RE, ' ');
           }
           let ext = path.extname(filePath);
@@ -330,59 +342,12 @@ function generateMultipleTemplates(rootFolder, templateFiles, config, localeList
   */
 }
 
-function oldgenerateTemplateOutput(rootFolder, templateFiles, config) {
-  var outputStr = `// This is an auto generated file. Do not edit!
-  import locales from './${config.tempLocalesName}';
-  const lang = locales();
-  const templates = {};
-
-  const getter = str => {
-    var el = document.createElement('template');
-    el.innerHTML = str;
-
-    return {
-      value: el.content.cloneNode(true)
-    };
-  };
-
-  Object.defineProperties(templates, {
-  `;
-
-  const len = templateFiles.length - 2;
-  outputStr = templateFiles.reduce(
-    (str, filePath, i) => {
-      let templateStr = readFile(filePath);
-      if (config.minTempalteWS) {
-        templateStr = templateStr.replace(MULTI_WS_RE, ' ');
-      }
-      let ext = path.extname(filePath);
-      let templateKey = path.basename(filePath, ext);
-      if (!VALID_TEMPLATE_KEY_TEST_RE.test(templateKey)) {
-        throw new Error(`Invalid Template name: ${filePath}\nTemplate file names can only use $, _ or alphanumeric characters.`);
-      }
-
-      let comma = i > len ? '' : ',';
-      let tempPath = filePath.replace(rootFolder, '');
-
-      str += `  // Included template file: .${tempPath}\n`;
-      str += `  '${templateKey}': getter(\`${templateStr}\`)${comma}\n`;
-
-      return str;
-    }, outputStr
-  ) + `});
-
-  export default templates;
-  `;
-
-  return outputStr;
-}
-
-function generateTemplateOutput(rootFolder, templateFiles, config) {
-  var outputStr = `// This is an auto generated file. Do not edit!
-import locales from './${config.tempLocalesName}';
-const lang = locales();
-
-function dom(key, data) {
+function generateTemplateOutput(rootFolder, templateFiles, config, includeLocales) {
+  var outputStr = '// This is an auto generated file. Do not edit!\n';
+  if (includeLocales) {
+    outputStr += `import locales from './${config.tempLocalesName}';\nconst lang = locales();\n\n`;
+  }
+  outputStr += `function dom(key, data) {
   var el = document.createElement('template');
   el.innerHTML = str(key, data);
   return el.content;
@@ -395,9 +360,12 @@ function str(key, data) {
   outputStr = templateFiles.reduce(
     (str, filePath, i) => {
       let templateStr = readFile(filePath);
-      if (config.minTempalteWS) {
+
+      // istanbul ignore else
+      if (config.minTemplateWS) {
         templateStr = templateStr.replace(MULTI_WS_RE, ' ');
       }
+
       let ext = path.extname(filePath);
       let templateKey = path.basename(filePath, ext);
       if (!VALID_TEMPLATE_KEY_TEST_RE.test(templateKey)) {
@@ -497,8 +465,9 @@ function convertString(keyHashCode, str) {
       isInTag = true;
       continue;
     }
-    else if (current === '$' && str[i + 1] === '{') {
-      // ignore replacement variables, e.g. ${myVar}
+    else if ((current === '$' && str[i + 1] === '{') ||
+             (current === '%' && str[i + 1] === '{')) {
+      // ignore replacement variables, e.g. ${myVar} and %{myVar}
       ret += current;
       isInVar = true;
       continue;
@@ -516,7 +485,7 @@ function convertString(keyHashCode, str) {
  *
  * str = string to use for the hash
  */
-function getKeyHash(str = '') {
+function getKeyHash(str) {
   let hash = 0;
 
   for (let i = 0; i < str.length; i++) {
@@ -535,6 +504,7 @@ function getKeyHash(str = '') {
 function createFiller(count) {
   var fill = '';
 
+  // istanbul ignore else
   if (count > 0) {
     fill = '-';
     for (let i = 1; i < count; i++) {

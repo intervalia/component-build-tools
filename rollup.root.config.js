@@ -20,16 +20,19 @@ function init(theirConfig = {}) {
   const rollupOptionsArray = [];
   const config = Object.assign({
     addEOLocale: true, // Add the EO locale if it does not exist
+    addKELocale: true, // Add the KE locale if it does not exist
     alwaysReturnFile: true,
     buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.IIFE ],
     debug: false,
     defaultLocale: 'en',
+    defaultLocaleVariable: 'window.locale',
     distPath: 'dist/js', // Path into which the distribution files will be placed
     includePath: true, // Place the dist files inside their folder
     localeFiles: ['locales/strings_*.json'],
     makeMinFiles: false,
-    minTempalteWS: true, // Minimize the white space for templates
+    minTemplateWS: true, // Minimize the white space for templates
     separateByLocale: false,
+    sourcemap: false,
     //srcFileName: 'wc.*.mjs',
     srcFolders: [], // Where to look for source files. User must supply this
     tagMissingStrings: true, // Mark missing locale strings so they are easily seen
@@ -49,34 +52,41 @@ function init(theirConfig = {}) {
       console.time(label);
       fs.readdirSync(srcRoot).forEach(
         (tempPath) => {
-          let fname = config.srcFileName || `${tempPath}.mjs`;
-          let componentFile = getSrcFiles(srcRoot, tempPath, fname)[0];
+          if (fs.lstatSync(path.join(srcRoot,tempPath)).isDirectory()) {
+            let fname = config.srcFileName || `${tempPath}.mjs`;
+            let componentFile = getSrcFiles(srcRoot, tempPath, fname)[0];
 
-          if (componentFile && fs.existsSync(componentFile)) {
-            srcList.push({
-              srcPath: tempPath
-            });
+            // istanbul ignore else
+            if (componentFile && fs.existsSync(componentFile)) {
+              srcList.push({
+                srcPath: tempPath
+              });
 
-            let localeList = [];
-            let componentPath = path.join(srcRoot, tempPath);
-            // TODO: If we are compiling for each locale then we need to repeat the `srcList.push`
-            let localeCode = cbtCompile.locales(componentPath, config);
-            // TODO: Handle what happens if `localeCode` is false
-            if (typeof localeCode === 'object') {
-              localeList = Object.keys(localeCode);
-              localeList.forEach(
-                (key) => {
-                  writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName.replace('.mjs', `_${key}.mjs`)), localeCode[key]);
-                }
-              );
+              let localeList = false;
+              let componentPath = path.join(srcRoot, tempPath);
+              // TODO: If we are compiling for each locale then we need to repeat the `srcList.push`
+
+              let localeCode = cbtCompile.locales(componentPath, config);
+              // istanbul ignore if
+              if (typeof localeCode === 'object') {
+                // Create one file per locale
+                localeList = Object.keys(localeCode);
+                localeList.forEach(
+                  (key) => {
+                    writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName.replace('.mjs', `_${key}.mjs`)), localeCode[key]);
+                  }
+                );
+              }
+              else if (localeCode) {
+                localeList = true;
+                writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName), localeCode);
+              }
+
+              let templateCode = cbtCompile.templates(componentPath, config, localeList);
+              if (templateCode) {
+                writeFile(path.join(componentPath, config.tempPath, config.tempTemplateName), templateCode);
+              }
             }
-            else {
-              writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName), localeCode);
-            }
-
-            let templateCode = cbtCompile.templates(componentPath, config, localeList);
-            // TODO: Handle what happens if `templateCode` is false
-            writeFile(path.join(componentPath, config.tempPath, config.tempTemplateName), templateCode);
           }
         }
       );
@@ -84,9 +94,11 @@ function init(theirConfig = {}) {
 
       srcList.forEach(
         ({ varName, srcPath, srcFile = config.srcFileName || srcPath + '.mjs', buildTypes }, index) => {
+          // istanbul ignore if
           if (!srcPath) {
             throw new Error('`srcPath` must be defined at index ' + index);
           }
+          // istanbul ignore if
           if (!srcFile) {
             throw new Error('`srcFile` must be defined at index ' + index);
           }
@@ -102,12 +114,14 @@ function init(theirConfig = {}) {
                 dstName += '.iife5.js';
                 transpile = true;
                 format = BUILD_TYPES.IIFE;
+                // istanbul ignore else
                 if (!varName) {
                   varName = srcPath.replace(/[.-]/g, '_');
                 }
               }
               else if (buildType === BUILD_TYPES.IIFE) {
                 dstName += '.iife.js';
+                // istanbul ignore else
                 if (!varName) {
                   varName = srcPath.replace(/[.-]/g, '_');
                 }
@@ -141,6 +155,10 @@ function init(theirConfig = {}) {
               if (transpile) {
                 buildItem.plugins.push(PLUGIN_BUBLE);
               }
+
+              if (config.sourcemap) {
+                buildItem.output.sourcemap = true;
+              }
               rollupOptionsArray.push(buildItem);
 
               if (config.makeMinFiles) {
@@ -169,6 +187,7 @@ function createFolders(filePath) {
   let len = pathParts.length;
   let tempPath = path.sep + pathParts[0];
   for (let i = 1; i < len; i++) {
+    // istanbul ignore if
     if (!fs.existsSync(tempPath)) {
       fs.mkdirSync(tempPath);
     }
@@ -182,9 +201,11 @@ function writeFile(filePath, content) {
 
   let bakFilePath = `${filePath}.bak`;
 
+  // istanbul ignore else
   if (fs.existsSync(bakFilePath)) {
     fs.unlinkSync(bakFilePath);
   }
+  // istanbul ignore else
   if (fs.existsSync(filePath)) {
     fs.renameSync(filePath, bakFilePath);
   }

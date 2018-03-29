@@ -1,0 +1,9 @@
+{
+  "BUTTON_OK": "OK",
+  "LABEL_FIND": "Find Me",
+  "TITLE_COOL": "This is a cool title",
+  "LONG_NAME_27": "This is a long named string",
+  "LONG_NAME_42": "This is an even longer named string. Weee.",
+  "HTML_STR": "<div class=\"first class\">This is the <b>best</b> thing ever on planet earth!</div>",
+  "VAR_STR": "Do ${something} and %{something_else} too."
+}
