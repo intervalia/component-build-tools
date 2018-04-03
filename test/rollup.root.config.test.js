@@ -24,14 +24,6 @@ var writtenFiles = [];
 
 const ROOT = process.cwd();
 
-function showCode(code) {
-  code.split(/[\r\n]+/).forEach(
-    (line, i) => {
-      console.log((i+1).toString().padStart(3)+':  ', line);
-    }
-  );
-}
-
 describe('Testing file `rollup.root.config.js`', () => {
   beforeEach(() => {
     writtenFiles = [];
@@ -121,7 +113,6 @@ describe('Testing file `rollup.root.config.js`', () => {
       sourcemap: true
     });
 
-    console.log(JSON.stringify(resp,0,2));
     expect(resp.length).to.equal(6);
     expect(resp[0].output.format).to.equal('iife');
     expect(resp[0].plugins.length).to.equal(1, 'iife only buble');
