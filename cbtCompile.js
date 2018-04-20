@@ -4,7 +4,7 @@ const glob = require('glob');
 const path = require('path');
 const FILLER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 .-_!@#$%^&*=+';
 const FILLER_MAX = FILLER.length;
-const LOCALE_RE = /_(.*).json/;
+const LOCALE_RE = /_([^_]*)\.json/;
 const MIXED_LANGS = [
   '鼻毛', '指先', '眉毛', 'ひれ', 'ヘビ', 'カブ', '子供', '日本', '言語', '馬鹿', // Japanese Chars
   '영어', '소금', '트럭', '히피', '포크', '토성', '아픈', '오리', '얼음', '극지', // Korean Chars
@@ -146,7 +146,7 @@ function readTranslations(rootFolder, fileList, config) {
       let toks = filePath.match(LOCALE_RE);
       let lang = toks[1];
       let fileContents = readFile(filePath).trim();
-      console.log('Translations for', filePath);
+      console.log(`Translations for [${lang}] ${filePath}`);
 
       var data;
       obj[`${lang}filePath`] = filePath.replace(rootFolder, ''); // Save the filename of this locale file
