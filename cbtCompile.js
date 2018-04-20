@@ -172,7 +172,7 @@ function readTranslations(rootFolder, fileList, config) {
 
   if (!translations.keys) {
     // If there was no locale file for the default locale then flag an error
-    throw new Error(`locale file for default locale "${config.defaultLocale}" was not found.`);
+    throw new Error(`locale file for default locale "${config.defaultLocale}" was not found in ${rootFolder}.`);
   }
 
   // istanbul ignore else
