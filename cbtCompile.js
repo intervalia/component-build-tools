@@ -161,6 +161,7 @@ function readTranslations(rootFolder, fileList, config) {
           if (lang === config.defaultLocale) {
             // If we are processing the default locale then save off the current set of keys.
             obj.keys = Object.keys(data);
+            console.log('default keys set');
           }
         }
         catch (e) {
@@ -171,6 +172,8 @@ function readTranslations(rootFolder, fileList, config) {
       return obj;
     }, {langs: []}
   );
+
+  console.log(JSON.stringify(translations,0,2));
 
   if (!translations.keys) {
     // If there was no locale file for the default locale then flag an error
