@@ -145,6 +145,7 @@ function readTranslations(rootFolder, fileList, config) {
       let toks = filePath.match(LOCALE_RE);
       let lang = toks[1];
       let fileContents = readFile(filePath).trim();
+      console.log('Translations for', filePath);
 
       var data;
       obj[`${lang}filePath`] = filePath.replace(rootFolder, ''); // Save the filename of this locale file
