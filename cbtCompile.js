@@ -140,6 +140,7 @@ function getFileArrayFromGlob(rootFolder, globList) {
 }
 
 function readTranslations(rootFolder, fileList, config) {
+  console.log('defaultLocale', defaultLocale);
   const translations = fileList.reduce(
     (obj, filePath) => {
       let toks = filePath.match(LOCALE_RE);
