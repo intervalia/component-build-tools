@@ -140,13 +140,13 @@ function getFileArrayFromGlob(rootFolder, globList) {
 }
 
 function readTranslations(rootFolder, fileList, config) {
-  console.log('defaultLocale', config.defaultLocale);
+  //console.log('defaultLocale', config.defaultLocale);
   const translations = fileList.reduce(
     (obj, filePath) => {
       let toks = filePath.match(LOCALE_RE);
       let lang = toks[1];
       let fileContents = readFile(filePath).trim();
-      console.log(`Translations for [${lang}] ${filePath}`);
+      //console.log(`Translations for [${lang}] ${filePath}`);
 
       var data;
       obj[`${lang}filePath`] = filePath.replace(rootFolder, ''); // Save the filename of this locale file
@@ -161,7 +161,7 @@ function readTranslations(rootFolder, fileList, config) {
           if (lang === config.defaultLocale) {
             // If we are processing the default locale then save off the current set of keys.
             obj.keys = Object.keys(data);
-            console.log('default keys set');
+            //console.log('default keys set');
           }
         }
         catch (e) {
@@ -173,7 +173,7 @@ function readTranslations(rootFolder, fileList, config) {
     }, {langs: []}
   );
 
-  console.log(JSON.stringify(translations,0,2));
+  //console.log(JSON.stringify(translations,0,2));
 
   if (!translations.keys) {
     // If there was no locale file for the default locale then flag an error
