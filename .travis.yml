@@ -1,0 +1,19 @@
+env:
+  global:
+before_install:
+  - echo -e "machine github.com\n  login $CI_USER_TOKEN" > ~/.netrc
+  - git config --global url.https://github.com/.insteadOf git://github.com/
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+branches:
+  only:
+    - master
+dist: trusty
+language: node_js
+node_js:
+  - "8.9.1"
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+addons:
+  chrome: stable
