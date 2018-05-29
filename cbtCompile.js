@@ -1,32 +1,11 @@
-/* eslint brace-style: 0, spaced-comment: 0, no-multi-spaces: 0, object-property-newline: 0 */
 const fs = require('fs');
-const glob = require('glob');
 const path = require('path');
-const FILLER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 .-_!@#$%^&*=+';
-const FILLER_MAX = FILLER.length;
+const getFileArrayFromGlob = require('./getFileArrayFromGlob.js');
+const readFile = require('./readFile.js');
+const readTranslations = require('./readTranslations.js');
 const IMPORT_RE = /<%([^%]+)%>/;
-const LOCALE_RE = /_([^_]*)\.json/;
-const MIXED_LANGS = [
-  '鼻毛', '指先', '眉毛', 'ひれ', 'ヘビ', 'カブ', '子供', '日本', '言語', '馬鹿', // Japanese Chars
-  '영어', '소금', '트럭', '히피', '포크', '토성', '아픈', '오리', '얼음', '극지', // Korean Chars
-  '孩子', '嬉皮', '雲彩', '占星', '胡說', '膀胱', '沙拉', '蠢貨', '烘烤', '蝸牛', // Chinese Chars
-  'да', 'ща', 'по', 'не', 'из', 'за', 'Ий', 'дя', 'ИФ', 'ья', // Russian Chars
-  'Ãé', 'Ûç', 'Çó', 'Ñá', 'Ýň', 'Èç', 'Ìë', 'Îú', 'Öà', 'Ūê' // Latin Chars
-];
 const MULTI_WS_RE = /\s+/g;
-const REPLACEMENT_MAP = {
-  A: 'ÀÁÂÃÄÅĀĄĂѦ', B: 'ƁɃḂ', C: 'ÇĆČĈĊ', D: 'ĎĐ', E: 'ÈÉÊËĒĘĚĔĖ', F: 'ƑḞ', G: 'ĜĞĠĢ',
-  H: 'ĤĦ', I: 'ÌÍÎÏĪĨĬĮİ', J: 'ĴɈ', K: 'ĶҞҠ', L: 'ŁĽĹĻĿ', M: 'ṀƜӍ', N: 'ÑŃŇŅŊПИ',
-  O: 'ÒÓÔÕÖØŌŐŎ', P: 'ƤṖ', R: 'ŔŘŖЯ', S: 'ŚŠŞŜȘ', T: 'ŤŢŦȚ', U: 'ÙÚÛÜŪŮŰŬŨŲЦ', V: 'ѴѶ',
-  W: 'ŴШЩѠ', X: 'ЖҲӾ', Y: 'ÝŶŸ', Z: 'ŹŽŻ',
-  a: 'àáâãäåāąă', b: 'БЪЬѢ', c: 'çćčĉċ', d: 'ďđ', e: 'èéêëēęěĕė', f: 'ƒḟ', g: 'ĝğġģ',
-  h: 'ĥħ', i: 'ìíîïīĩĭįı', j: 'ĵǰɉ', k: 'ķĸƙǩ', l: 'łľĺļŀ', m: 'ṁӎ', n: 'ñńňņŉŋ',
-  o: 'òóôõöøōőŏФ', r: 'ŕřŗя', s: 'śšşŝș', t: 'ťţŧț', u: 'ùúûüūůűŭũų', v: 'ѵѷ',
-  w: 'ŵѡ', x: 'ӿӽж', y: 'ýÿŷЧѰ', z: 'žżź'
-};
 const VALID_TEMPLATE_KEY_TEST_RE = /^[\w$][\w\d$]*$/;
-
-const readFile = filePath => fs.readFileSync(filePath, {encoding: 'utf-8'}).trim().replace(/`/g, '\\`');
 
 /************************************************\
                  Public Functions
@@ -95,100 +74,6 @@ function templates(rootFolder, config, localeList) {
 \************************************************/
 
 /*
- * Convert an array of Globby paths into an array of paths of existing files.
- */
-function getFileArrayFromGlob(rootFolder, globList) {
-  let globArray = globList;
-  if (!Array.isArray(globList)) {
-    globArray = [globList];
-  }
-  return globArray.reduce(
-    (obj, pattern) => {
-      const options = {
-        cwd: '/',
-        root: '/'
-      };
-
-      const tempPath = path.join(rootFolder, pattern);
-      const newList = glob.sync(tempPath, options);
-
-      // no files returned
-      if (!newList.length) {
-        // don't pass the file to the process script if it's a glob tempPath
-        // istanbul ignore next
-        if (!glob.hasMagic(tempPath)) {
-          obj.push(tempPath);
-        }
-      }
-      else {
-        newList.forEach(function(item) {
-          item = path.resolve(rootFolder, item);
-
-          // istanbul ignore next
-          if (obj.indexOf(item) === -1) {
-            obj.push(item);
-          }
-        });
-      }
-
-      return obj;
-    }, []
-  );
-}
-
-function readTranslations(rootFolder, fileList, config) {
-  //console.log('defaultLocale', config.defaultLocale);
-  const translations = fileList.reduce(
-    (obj, filePath) => {
-      let toks = filePath.match(LOCALE_RE);
-      let lang = toks[1];
-      let fileContents = readFile(filePath).trim();
-      //console.log(`Translations for [${lang}] ${filePath}`);
-
-      var data;
-      obj[`${lang}filePath`] = filePath.replace(rootFolder, ''); // Save the filename of this locale file
-
-      // istanbul ignore else
-      if (fileContents.length > 0) {
-        try {
-          data = JSON.parse(fileContents); // Convert the file JSON text into an object
-          obj[lang] = data; // Save the JSON
-          obj.langs.push(lang); // Indicate that we support this language
-
-          if (lang === config.defaultLocale) {
-            // If we are processing the default locale then save off the current set of keys.
-            obj.keys = Object.keys(data);
-            //console.log('default keys set');
-          }
-        }
-        catch (e) {
-          throw new Error(`Unable to parse locale file: ${filePath}:: ${e}`);
-        }
-      }
-
-      return obj;
-    }, {langs: []}
-  );
-
-  //console.log(JSON.stringify(translations,0,2));
-
-  if (!translations.keys) {
-    // If there was no locale file for the default locale then flag an error
-    throw new Error(`locale file for default locale "${config.defaultLocale}" was not found in ${rootFolder}.`);
-  }
-
-  // istanbul ignore else
-  if (config.addEOLocale && !translations.eo) {
-    // If we are adding EO and there was not EO file then generate a version of EO
-    translations.eo = createEOTranslations(translations[config.defaultLocale]); // Save the JSON
-    translations.eofilePath = ' * Auto Generated * .';
-    translations.langs.push('eo'); // Indicate that we support this language
-  }
-
-  return translations;
-}
-
-/*
  * Generate an array of locale file contents for every locale source file
  */
 // istanbul ignore next
@@ -237,7 +122,7 @@ function createSingleLocalesFile(rootFolder, fileList, config) {
   let strings = translations.langs.sort().reduce(
     (str, locale, index) => {
       let filePath = translations[`${locale}filePath`];
-      str +=  `  // Included locale file: .${filePath}\n`;
+      str +=  `  // Included locale file: .${filePath}\n`; // eslint-disable-line no-multi-spaces
       const strs = [];
 
       translations.keys.forEach(
@@ -421,126 +306,6 @@ export default {dom, str};
 `;
 
   return outputStr;
-}
-
-/*
- * creates pseudo locale object from one english locale object
- */
-function createEOTranslations(engProps) {
-  return Object.keys(engProps).reduce(
-    (obj, key) => {
-      obj[key] = makeEOProp(key, engProps[key]);
-      return obj;
-    }, {}
-  );
-}
-
-/*
- * converts characters, adds length, and adds CKJ characters for a single string in a locale
- */
-function makeEOProp(key, enStr) {
-  const keyHashCode = getKeyHash(key);
-  let newValue = convertString(keyHashCode, enStr);
-  let suffix = MIXED_LANGS[keyHashCode % MIXED_LANGS.length];
-  let length = newValue.length;
-  let combinedLength = length + suffix.length;
-
-  if (length > 0 && length <= 5) {
-    length = 9;
-  }
-  else if (length >= 6 && length <= 25) {
-    length *= 1.9;
-  }
-  else if (length >= 26 && length <= 40) {
-    length *= 1.6;
-  }
-  else if (length >= 41 && length <= 70) {
-    length *= 1.3;
-  }
-
-  let expansion = createFiller(Math.round(length - combinedLength));
-
-  return '[' + newValue + expansion + suffix + ']';
-}
-
-/*
- * performs the character replacement for pseudo locale creation
- */
-function convertString(keyHashCode, str) {
-  let i;
-  let isInTag = false;
-  let isInVar = false;
-  let strLength = str.length;
-  let ret = '';
-
-  for (i = 0; i < strLength; i++) {
-    let current = str[i];
-
-    if (isInTag) {
-      ret += current;
-      isInTag = current !== '>';
-      continue;
-    }
-    else if (isInVar) {
-      ret += current;
-      isInVar = current !== '}';
-      continue;
-    }
-    else if (current === '<') {
-      // ignore HTML tags (but not content inside opening and closing tags,
-      // e.g. for <p>Something</p> ignores <p> and </p> but not "Something")
-      ret += current;
-      isInTag = true;
-      continue;
-    }
-    else if ((current === '$' && str[i + 1] === '{') ||
-             (current === '%' && str[i + 1] === '{')) {
-      // ignore replacement variables, e.g. ${myVar} and %{myVar}
-      ret += current;
-      isInVar = true;
-      continue;
-    }
-
-    var replacements = REPLACEMENT_MAP[current] || [current];
-    ret += replacements[keyHashCode % replacements.length];
-  }
-
-  return ret;
-}
-
-/*
- * Create a hash based on the string's KEY
- *
- * str = string to use for the hash
- */
-function getKeyHash(str) {
-  let hash = 0;
-
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash = hash & hash; // Convert to 32bit integer
-  }
-
-  return Math.abs(hash);
-}
-
-/*
- * Create filler to bring the EO strings up to a percentage longer
- *
- * count = number of characters to include
- */
-function createFiller(count) {
-  var fill = '';
-
-  // istanbul ignore else
-  if (count > 0) {
-    fill = '-';
-    for (let i = 1; i < count; i++) {
-      fill += FILLER[Math.round(Math.random() * FILLER_MAX)];
-    }
-  }
-
-  return fill + '-:';
 }
 
 module.exports = {

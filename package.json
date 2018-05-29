@@ -6,7 +6,7 @@
   "scripts": {
     "debug": "mocha --inspect-brk test/**/*.test.js",
     "lint": "eslint cbtCompile.js \"test/*.js\"",
-    "test": "bin/unit-tests"
+    "test": "npm run lint && bin/unit-tests"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,5 @@
 # component-build-tools
+
 A set of build tools to help in the creation of components
 
 Used with [rollup](https://www.npmjs.com/package/rollup), these tools will allow you to process locale file and template files into a set of `.mjs` files that are importable in your script files.
@@ -33,7 +34,6 @@ module.exports = rollup.init(config);
 Then, to run rollup:
 
     ./node_modules/.bin/rollup -c
-
 
 ## Options
 
@@ -147,7 +147,7 @@ import locales from "./_compiled/locales.mjs";
 const lang = locales('en');
 ```
 
-> If no locale key is provided in the `locales()` function then the default locale object is returned. 
+> If no locale key is provided in the `locales()` function then the default locale object is returned.
 
 ## Templates
 
@@ -231,9 +231,7 @@ import name from "../name.mjs";
 </div>
 ```
 
-The import line of code will be inserted into the top of `templates.mjs`.
-
-_You can add as many import lines as you need._
+The import line of code will be inserted into the top of `templates.mjs`. _You can add as many import lines as you need._
 
 > ONLY `import` is valid within a template. No other code is permitted.
 
