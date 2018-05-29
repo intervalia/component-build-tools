@@ -52,7 +52,7 @@ function init(theirConfig = {}) {
       console.time(label);
       fs.readdirSync(srcRoot).forEach(
         (tempPath) => {
-          if (fs.lstatSync(path.join(srcRoot,tempPath)).isDirectory()) {
+          if (fs.lstatSync(path.join(srcRoot, tempPath)).isDirectory()) {
             let fname = config.srcFileName || `${tempPath}.mjs`;
             let componentFile = getSrcFiles(srcRoot, tempPath, fname)[0];
 
