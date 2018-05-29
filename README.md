@@ -131,14 +131,124 @@ would still produce the same output structure of:
 
 If you have all of your components in the folder `./comps` then you would call `rollup.init({srcFolders:['./comps']})`.
 
-Every folder directly under `./comps` would get processed and the build tools and handed off to rollup.
+Every folder directly under `./comps` would get processed. Any subfolder that was found to match the requirements of a component will be handed off to rollup for further processing.
 
+## Locale files
+
+Locale files are JSON files that contain locale specific translations of strings you use in your application. By default the files are all placed in the `locales` folder and are named `strings_??.json` where the `??` is the 2 letter locale such as `en`, `fr`, or `ja`.
+
+The file `./locales/strings_en.json` will contain the English version of the strings. The file `./locales/strings_fr.json` contains the French version of the strings. You can use things like `en-US` for US english and `fr-CA` for Canadian French. The two letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) code and a subset of the [BCP-47](http://www.ietf.org/rfc/bcp/bcp47.txt) codes are supported.
+
+Currently we only support the 2 letter ISO 639-1 code and this ISO 639-1 code followed by a dash `"-"` and then the 2 letter ISO-3166 country code. Like `en`, `fr`, `en-US`, `en-GB`, `fr-CA` and `fr-FR`. **Case is ignored.**
+
+> [ISO-3166 Country Codes and ISO-639 Language Codes](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
+
+These locale files are combined into the file `./_compiled/locales.mjs` and you access them by importing that file and then calling the default function to get the set of locale strings for the specified locale.
+
+```JavaScript
+import locales from "./_compiled/locales.mjs";
+const lang = locales('en');
+```
+
+> If no locale key is provided in the `locales()` function then the default locale object is returned. 
+
+## Templates
+
+Template files tend to be HTML files but can be any kind of file. The templates are embedded into a template literal inside of the `template.mjs` file.
+
+The template file `person.html`:
+
+```html
+<div class="person">
+  <div>Name: <span class="name">Frank N Stein</span></div>
+</div>
+```
+
+Would create a `templates.mjs` file with:
+
+```JavaScript
+  case 'person':
+    return `<div class="person"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
+```
+
+### Using locale strings in templates
+
+If your component includes both templates and locale strings then the strings are made available to the template through the `lang` variable. The `lang` variable is auto-inserted into the `templates.mjs` file for all projects that have locale string files.
+
+Locale file: `./locales/strings_en.json`
+
+```JSON
+{
+  "NAME": "Frank N Stein"
+}
+```
+
+Template file: `./person.html`
+
+```html
+<div class="person">
+  <div>Name: <span class="name">${lang.NAME}</span></div>
+</div>
+```
+
+Output in `./_compiled/templates.mjs`:
+
+```JavaScript
+import locales from './locales.mjs';
+const lang = locales();
+.
+.
+.
+
+templates.str = function(key, data) {
+  switch(key) {
+ 	 case 'person';
+ 	   return `<div class="person"> <div>Name: <span class="name">${lang.NAME}</span></div> </div>`;
+ 	 .
+ 	 .
+ 	 .
+  }
+}
+```
+
+
+### Adding an `import` in a template
+
+Sometimes you need to be able to access external code within a template.
+
+In this example we need an external function called `name`.
+
+```html
+<div class="person">
+  <div>Name: <span class="name">${name("FRANK")}</span></div>
+</div>
+```
+
+To do this we can add the import to the template file like this:
+
+```html
+<%
+import name from "../name.mjs";
+%>
+<div class="person">
+  <div>Name: <span class="name">${name("FRANK")}</span></div>
+</div>
+```
+
+The import line of code will be inserted into the top of `templates.mjs`.
+
+_You can add as many import lines as you need._
+
+> ONLY `import` is valid within a template. No other code is permitted.
 
 ## History
 
 | Date | Version | Description |
 | --- | --- | --- |
-| 03/20/2018 | 2.0.0 | &#x25cf; Added options for `addKELocale`, `defaultLocaleVariable ` and `sourcemap`.<br/>&#x25cf; Spelling Correction: Renamed option `minTempalteWS` to `minTemplateWS`.<br/>&#x25cf; If there are no compiled files to generate and `alwaysReturnFile` if set to `false` then no temporary folder is created. |
-| 02/26/2018 | 1.0.0 | Initial Release |
+| 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. |
+| 05/10/2018 | 1.0.2 | &#x25cf; Corrected REGEX to get correct file names for locale files.<br/>&#x25cf; Improved error output to simplify debugging. |
+| 04/03/2018 | 1.0.1 | &#x25cf; Added pre-commit tests. |
+| 03/29/2018 | 1.0.0 | &#x25cf; Added options for `addKELocale`, `defaultLocaleVariable ` and `sourcemap`.<br/>&#x25cf; Spelling Correction: Renamed option `minTempalteWS` to `minTemplateWS`.<br/>&#x25cf; If there are no compiled files to generate and `alwaysReturnFile` if set to `false` then no temporary folder is created. |
+| 02/26/2018 | 0.0.0 | Initial Release. |
 
 

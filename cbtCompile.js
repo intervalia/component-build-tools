@@ -4,6 +4,7 @@ const glob = require('glob');
 const path = require('path');
 const FILLER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 .-_!@#$%^&*=+';
 const FILLER_MAX = FILLER.length;
+const IMPORT_RE = /<%([^%]+)%>/;
 const LOCALE_RE = /_([^_]*)\.json/;
 const MIXED_LANGS = [
   '鼻毛', '指先', '眉毛', 'ひれ', 'ヘビ', 'カブ', '子供', '日本', '言語', '馬鹿', // Japanese Chars
@@ -348,24 +349,36 @@ function generateMultipleTemplates(rootFolder, templateFiles, config, localeList
 }
 
 function generateTemplateOutput(rootFolder, templateFiles, config, includeLocales) {
-  var outputStr = '// This is an auto generated file. Do not edit!\n';
-  if (includeLocales) {
-    outputStr += `import locales from './${config.tempLocalesName}';\nconst lang = locales();\n\n`;
-  }
-  outputStr += `function dom(key, data) {
-  var el = document.createElement('template');
-  el.innerHTML = str(key, data);
-  return el.content;
-}
-
-function str(key, data) {
-  switch (key) {`;
-
   const len = templateFiles.length - 2;
-  outputStr = templateFiles.reduce(
+  let scriptLines = [];
+  const templateList = templateFiles.reduce(
     (str, filePath, i) => {
       let templateStr = readFile(filePath);
 
+      while(true) {
+        let script = templateStr.match(IMPORT_RE);
+        if (script) {
+          templateStr = templateStr.replace(script[0],'').trim();
+          // TODO: Find a way to improve the imports
+          script[1].trim().split(/[;\r\n]+/).forEach(
+            line => {
+              line = line.trim();
+              if (line.length > 0) {
+                if (line.substr(0,7) !== 'import ') {
+                  throw new Error(`Only "import" is allowed: "${line}"`);
+                }
+                line+=';';
+                if (!scriptLines.includes(line)) {
+                  scriptLines.push(line);
+                }
+              }
+            }
+          );
+        }
+        else {
+          break;
+        }
+      }
       // istanbul ignore else
       if (config.minTemplateWS) {
         templateStr = templateStr.replace(MULTI_WS_RE, ' ');
@@ -380,16 +393,31 @@ function str(key, data) {
       //let comma = i > len ? '' : ',';
       let tempPath = filePath.replace(rootFolder, '');
 
-      str += `
-    // Included template file: .${tempPath}
+      return str + `    // Included template file: .${tempPath}
     case '${templateKey}':
       return \`${templateStr}\`;
-`;
 
-      return str;
-    }, outputStr
-  ) + `
-    default:
+`;
+    }, ''
+  );
+
+  var outputStr = '// This is an auto generated file. Do not edit!\n';
+  if (scriptLines.length > 0) {
+    outputStr += scriptLines.join('\n')+'\n\n';
+  }
+
+  if (includeLocales) {
+    outputStr += `import locales from './${config.tempLocalesName}';\nconst lang = locales();\n\n`;
+  }
+  outputStr += `function dom(key, data) {
+  var el = document.createElement('template');
+  el.innerHTML = str(key, data);
+  return el.content;
+}
+
+function str(key, data) {
+  switch (key) {
+${templateList}    default:
       return '';
   }
 }

@@ -118,14 +118,15 @@ describe('Testing file cbtCompile.js', () => {
       const config = Object.assign({}, defaultConfig);
 
       var results;
+      var fpath = path.join(ROOT, './test/testFolders/cbtCompileFolders/withLocalesMissingDefault');
 
       try {
-        results = cbtCompile.locales(path.join(ROOT, './test/testFolders/cbtCompileFolders/withLocalesMissingDefault'), config);
+        results = cbtCompile.locales(fpath, config);
         done(new Error('We did not throw an exception for missing default locale file and should have.'));
       }
 
       catch(ex) {
-        expect(ex.message).to.equal('locale file for default locale "en" was not found.');
+        expect(ex.message).to.equal(`locale file for default locale "en" was not found in ${fpath}.`);
         done();
       }
     });
@@ -208,6 +209,34 @@ describe('Testing file cbtCompile.js', () => {
 
       // Convert from ES6 module import to IIFE like return value
       results = results.replace('export default', 'return');
+      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+      var templates = testFn();
+
+      expect(templates.str('test1')).to.equal('<div>Content for Test1</div>');
+    });
+
+    it('should handle template files with imports', () => {
+      const config = Object.assign({}, defaultConfig);
+
+      var results = cbtCompile.templates(path.join(ROOT, './test/testFolders/cbtCompileFolders/withImports'), config);
+
+      // Convert from ES6 module import to IIFE like return value
+      results = results.replace('export default', 'return');
+
+      var importRE = /^import\s+([^;]+);/mg;
+      var res = importRE.exec(results);
+      expect(res).to.be.an('array');
+      expect(res.length).to.equal(2);
+      expect(res[1]).to.equal('{dogs, cats} from "animals.js"');
+      res = importRE.exec(results);
+      expect(res).to.be.an('array');
+      expect(res.length).to.equal(2);
+      expect(res[1]).to.equal('"second.js"');
+      res = importRE.exec(results);
+      expect(res).to.be.an('null');
+
+      results = results.replace(/^import/mg, '//import');
+
       var testFn = new Function(results); // Create a temporary function to test this compiled code.
       var templates = testFn();
 
