@@ -131,11 +131,11 @@ would still produce the same output structure of:
 
 If you have all of your components in the folder `./comps` then you would call `rollup.init({srcFolders:['./comps']})`.
 
-Every folder directly under `./comps` would get processed and the build tools and handed off to rollup.
+Every folder directly under `./comps` would get processed. Any subfolder that was found to match the requirements of a component will be handed off to rollup for further processing.
 
 ## Locale files
 
-Locale files are JSON files that contains locale specific translations of strings you use in your application. By default the files are all placed in the `locales` folder and are names `strings_??.json` where the `??` is the 2 letter locale such as `en`, `fr`, or `ja`.
+Locale files are JSON files that contain locale specific translations of strings you use in your application. By default the files are all placed in the `locales` folder and are named `strings_??.json` where the `??` is the 2 letter locale such as `en`, `fr`, or `ja`.
 
 The file `./locales/strings_en.json` will contain the English version of the strings. The file `./locales/strings_fr.json` contains the French version of the strings. You can use things like `en-US` for US english and `fr-CA` for Canadian French. The two letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) code and a subset of the [BCP-47](http://www.ietf.org/rfc/bcp/bcp47.txt) codes are supported.
 
@@ -164,7 +164,7 @@ The template file `person.html`:
 </div>
 ```
 
-Would before the template:
+Would create a `templates.mjs` file with:
 
 ```JS
   case 'person':
@@ -173,7 +173,7 @@ Would before the template:
 
 ### Using locale strings in templates
 
-If your component includes both templates and locale strings then the strings are made available to the template through the `lang` variable. The `lang` variable it auto-inserted into the `templates.mjs` file for all projects that have locale string files.
+If your component includes both templates and locale strings then the strings are made available to the template through the `lang` variable. The `lang` variable is auto-inserted into the `templates.mjs` file for all projects that have locale string files.
 
 Locale file: `./locales/strings_en.json`
 
