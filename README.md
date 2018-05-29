@@ -78,9 +78,6 @@ When you call `rollup.init` you pass in a set of options. Most are optional. The
 | tempTemplateName | string | `'templates.mjs'` | The filename used for the compiled `templates` file. |
 | useStrict | bool | `false` | If `true` then add `"use strict"` at the top of the rolled up output files. |
 
-
-
-
 #### srcFileName
 
 If `srcFileName` is left as `undefined` then the name of the source files will be the same name as the folder with the extension of `.mjs`.
@@ -202,15 +199,14 @@ const lang = locales();
 
 templates.str = function(key, data) {
   switch(key) {
- 	 case 'person';
- 	   return `<div class="person"> <div>Name: <span class="name">${lang.NAME}</span></div> </div>`;
- 	 .
- 	 .
- 	 .
+    case 'person';
+      return `<div class="person"> <div>Name: <span class="name">${lang.NAME}</span></div> </div>`;
+    .
+    .
+    .
   }
 }
 ```
-
 
 ### Adding an `import` in a template
 
@@ -245,7 +241,7 @@ _You can add as many import lines as you need._
 
 | Date | Version | Description |
 | --- | --- | --- |
-| 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. |
+| 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. Added Travis and Code Climate. |
 | 05/10/2018 | 1.0.2 | &#x25cf; Corrected REGEX to get correct file names for locale files.<br/>&#x25cf; Improved error output to simplify debugging. |
 | 04/03/2018 | 1.0.1 | &#x25cf; Added pre-commit tests. |
 | 03/29/2018 | 1.0.0 | &#x25cf; Added options for `addKELocale`, `defaultLocaleVariable ` and `sourcemap`.<br/>&#x25cf; Spelling Correction: Renamed option `minTempalteWS` to `minTemplateWS`.<br/>&#x25cf; If there are no compiled files to generate and `alwaysReturnFile` if set to `false` then no temporary folder is created. |
