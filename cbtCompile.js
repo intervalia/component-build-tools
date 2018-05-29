@@ -116,29 +116,14 @@ export default function () (${JSON.stringify(strings)});
 function createSingleLocalesFile(rootFolder, fileList, config) {
   // Read all of the locale file
   let translations = readTranslations(rootFolder, fileList, config);
-
   let len = translations.langs.length - 2;
   // Build up the file content for the file `locales.mjs`
   let strings = translations.langs.sort().reduce(
     (str, locale, index) => {
       let filePath = translations[`${locale}filePath`];
-      str +=  `  // Included locale file: .${filePath}\n`; // eslint-disable-line no-multi-spaces
-      const strs = [];
+      const strs = translations.keys.map((key, keyIndex) => translations[locale][key] || (config.tagMissingStrings ? `-*${translations[config.defaultLocale][key]}*-` : translations[config.defaultLocale][key]));
 
-      translations.keys.forEach(
-        (key, keyIndex) => {
-          if (config.tagMissingStrings) {
-            strs.push(translations[locale][key] || `-*${translations[config.defaultLocale][key]}*-`);
-          }
-          else {
-            strs.push(translations[locale][key] || translations[config.defaultLocale][key]);
-          }
-        }
-      );
-
-      str += `  "${locale}": ${JSON.stringify(strs)}${(index > len) ? '\n' : ',\n'}`;
-
-      return str;
+      return str + `  // Included locale file: .${filePath}\n  "${locale}": ${JSON.stringify(strs)}${(index > len) ? '\n' : ',\n'}`; // eslint-disable-line no-multi-spaces
     }, '{\n'
   ) + '}';
 

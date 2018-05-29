@@ -24,7 +24,6 @@
     "rollup-plugin-uglify-es": "0.0.1"
   },
   "pre-commit": [
-    "lint",
     "test"
   ],
   "devDependencies": {
