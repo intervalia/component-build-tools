@@ -51,7 +51,7 @@ describe('Testing file cbtCompile.js', () => {
 
   describe('Tests for cbtCompile.locales()', () => {
     it('should handle no locale files: no return', () => {
-      const config = Object.assign({}, defaultConfig,{
+      const config = Object.assign({}, defaultConfig, {
         alwaysReturnFile: false
       });
 
@@ -60,9 +60,9 @@ describe('Testing file cbtCompile.js', () => {
     });
 
     it('should handle no locale files: sent as string, no return', () => {
-      const config = Object.assign({}, defaultConfig,{
+      const config = Object.assign({}, defaultConfig, {
         alwaysReturnFile: false,
-        localeFiles: 'locales/strings_*.json',
+        localeFiles: 'locales/strings_*.json'
       });
 
       var results = cbtCompile.locales(path.join(ROOT, './test/testFolders/cbtCompileFolders/noLocales'), config);
@@ -83,19 +83,21 @@ describe('Testing file cbtCompile.js', () => {
 
       // Convert from ES6 module import to IIFE like return value
       results = results.replace('export default', 'return');
-      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+      // Create a temporary function to test this compiled code.
+      var testFn = new Function(results); // eslint-disable-line no-new-func
       //showCode(testFn.toString());
 
       // Get the `getLocaleStrings` function
       var locales = testFn();
-      expect(locales('en')).to.eql({"BUTTON_OK": "OK","LABEL_FIND": "Find Me","TITLE_COOL": "This is a cool title"}, 'English');
-      expect(locales('fr')).to.eql({"BUTTON_OK": "OK","LABEL_FIND": "Trouvez-moi","TITLE_COOL": "C'est un titre sympa"}, "French");
-      expect(locales('it')).to.eql({"BUTTON_OK": "Bene","LABEL_FIND": "Trovami","TITLE_COOL": "Questo è un titolo interessante"}, "Italian");
-      expect(locales('ja')).to.eql({"BUTTON_OK": "OK","LABEL_FIND": "私を見つける","TITLE_COOL": "これはクールなタイトルです"}, "Japanese");
-      expect(locales('ke')).to.eql({"BUTTON_OK": "BUTTON_OK","LABEL_FIND": "LABEL_FIND","TITLE_COOL": "TITLE_COOL"}, "KE");
+      expect(locales('en')).to.eql({BUTTON_OK: "OK", LABEL_FIND: "Find Me", TITLE_COOL: "This is a cool title"}, 'English');
+      expect(locales('fr')).to.eql({BUTTON_OK: "OK", LABEL_FIND: "Trouvez-moi", TITLE_COOL: "C'est un titre sympa"}, "French");
+      expect(locales('it')).to.eql({BUTTON_OK: "Bene", LABEL_FIND: "Trovami", TITLE_COOL: "Questo è un titolo interessante"}, "Italian");
+      expect(locales('ja')).to.eql({BUTTON_OK: "OK", LABEL_FIND: "私を見つける", TITLE_COOL: "これはクールなタイトルです"}, "Japanese");
+      expect(locales('ke')).to.eql({BUTTON_OK: "BUTTON_OK", LABEL_FIND: "LABEL_FIND", TITLE_COOL: "TITLE_COOL"}, "KE");
       var eo = locales('eo');
       expect(eo).to.be.an('object');
-      expect(Object.keys(eo)).to.eql(["BUTTON_OK","LABEL_FIND","TITLE_COOL"]);
+      expect(Object.keys(eo)).to.eql(["BUTTON_OK", "LABEL_FIND", "TITLE_COOL"]);
     });
 
     it('should handle poorly formed locale file', (done) => {
@@ -108,8 +110,8 @@ describe('Testing file cbtCompile.js', () => {
         done(new Error('We did not throw an exception for invalid JSON locale file and should have.'));
       }
 
-      catch(ex) {
-        expect(ex.message.substr(0,27)).to.equal('Unable to parse locale file');
+      catch (ex) {
+        expect(ex.message.substr(0, 27)).to.equal('Unable to parse locale file');
         done();
       }
     });
@@ -125,7 +127,7 @@ describe('Testing file cbtCompile.js', () => {
         done(new Error('We did not throw an exception for missing default locale file and should have.'));
       }
 
-      catch(ex) {
+      catch (ex) {
         expect(ex.message).to.equal(`locale file for default locale "en" was not found in ${fpath}.`);
         done();
       }
@@ -138,19 +140,21 @@ describe('Testing file cbtCompile.js', () => {
 
       // Convert from ES6 module import to IIFE like return value
       results = results.replace('export default', 'return');
-      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+      // Create a temporary function to test this compiled code.
+      var testFn = new Function(results); // eslint-disable-line no-new-func
       //showCode(testFn.toString());
 
       // Get the `getLocaleStrings` function
       var locales = testFn();
-      expect(locales('en')).to.eql({"BUTTON_CANCEL": "Cancel","ONLY_EN": "This is only in EN"}, 'English');
-      expect(locales('fr')).to.eql({"BUTTON_CANCEL": "Annuler","ONLY_EN": "-*This is only in EN*-"}, "French");
-      expect(locales('it')).to.eql({"BUTTON_CANCEL": "Annulla","ONLY_EN": "-*This is only in EN*-"}, "Italian");
-      expect(locales('ja')).to.eql({"BUTTON_CANCEL": "キャンセル","ONLY_EN": "-*This is only in EN*-"}, "Japanese");
-      expect(locales('ke')).to.eql({"BUTTON_CANCEL": "BUTTON_CANCEL","ONLY_EN": "ONLY_EN"}, "KE");
+      expect(locales('en')).to.eql({BUTTON_CANCEL: "Cancel", ONLY_EN: "This is only in EN"}, 'English');
+      expect(locales('fr')).to.eql({BUTTON_CANCEL: "Annuler", ONLY_EN: "-*This is only in EN*-"}, "French");
+      expect(locales('it')).to.eql({BUTTON_CANCEL: "Annulla", ONLY_EN: "-*This is only in EN*-"}, "Italian");
+      expect(locales('ja')).to.eql({BUTTON_CANCEL: "キャンセル", ONLY_EN: "-*This is only in EN*-"}, "Japanese");
+      expect(locales('ke')).to.eql({BUTTON_CANCEL: "BUTTON_CANCEL", ONLY_EN: "ONLY_EN"}, "KE");
       var eo = locales('eo');
       expect(eo).to.be.an('object');
-      expect(Object.keys(eo)).to.eql(["BUTTON_CANCEL","ONLY_EN"]);
+      expect(Object.keys(eo)).to.eql(["BUTTON_CANCEL", "ONLY_EN"]);
     });
 
     it('should handle alternate options', () => {
@@ -162,22 +166,24 @@ describe('Testing file cbtCompile.js', () => {
       var results = cbtCompile.locales(path.join(ROOT, './test/testFolders/cbtCompileFolders/withLocalesAlternate'), config);
       // Convert from ES6 module import to IIFE like return value
       results = results.replace('export default', 'return');
-      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+      // Create a temporary function to test this compiled code.
+      var testFn = new Function(results); // eslint-disable-line no-new-func
       //showCode(testFn.toString());
 
       // Get the `getLocaleStrings` function
       var locales = testFn();
-      expect(locales('en')).to.eql({"BUTTON_OK": "OK","LABEL_FIND": "Find Me","TITLE_COOL": "This is a cool title","LONG_NAME_27": "This is a long named string","LONG_NAME_42": "This is an even longer named string. Weee.","HTML_STR": "<div class=\"first class\">This is the <b>best</b> thing ever on planet earth!</div>","VAR_STR": "Do ${something} and %{something_else} too."}, 'English');
-      expect(locales('ke')).to.eql({"BUTTON_OK": "OK","LABEL_FIND": "Find Me","TITLE_COOL": "This is a cool title","LONG_NAME_27": "This is a long named string","LONG_NAME_42": "This is an even longer named string. Weee.","HTML_STR": "<div class=\"first class\">This is the <b>best</b> thing ever on planet earth!</div>","VAR_STR": "Do ${something} and %{something_else} too."}, 'KE');
+      expect(locales('en')).to.eql({BUTTON_OK: "OK", LABEL_FIND: "Find Me", TITLE_COOL: "This is a cool title", LONG_NAME_27: "This is a long named string", LONG_NAME_42: "This is an even longer named string. Weee.", HTML_STR: "<div class=\"first class\">This is the <b>best</b> thing ever on planet earth!</div>", VAR_STR: "Do ${something} and %{something_else} too."}, 'English');
+      expect(locales('ke')).to.eql({BUTTON_OK: "OK", LABEL_FIND: "Find Me", TITLE_COOL: "This is a cool title", LONG_NAME_27: "This is a long named string", LONG_NAME_42: "This is an even longer named string. Weee.", HTML_STR: "<div class=\"first class\">This is the <b>best</b> thing ever on planet earth!</div>", VAR_STR: "Do ${something} and %{something_else} too."}, 'KE');
       var eo = locales('eo');
       expect(eo).to.be.an('object');
-      expect(Object.keys(eo)).to.eql(["BUTTON_OK","LABEL_FIND","TITLE_COOL","LONG_NAME_27","LONG_NAME_42","HTML_STR","VAR_STR"], "EO");
+      expect(Object.keys(eo)).to.eql(["BUTTON_OK", "LABEL_FIND", "TITLE_COOL", "LONG_NAME_27", "LONG_NAME_42", "HTML_STR", "VAR_STR"], "EO");
     });
   });
 
   describe('Tests for cbtCompile.templates()', () => {
     it('should handle no template files: no return', () => {
-      const config = Object.assign({}, defaultConfig,{
+      const config = Object.assign({}, defaultConfig, {
         alwaysReturnFile: false
       });
 
@@ -186,9 +192,9 @@ describe('Testing file cbtCompile.js', () => {
     });
 
     it('should handle no template files: sent as string, no return', () => {
-      const config = Object.assign({}, defaultConfig,{
+      const config = Object.assign({}, defaultConfig, {
         alwaysReturnFile: false,
-        templateFiles: '*.html',
+        templateFiles: '*.html'
       });
 
       var results = cbtCompile.templates(path.join(ROOT, './test/testFolders/cbtCompileFolders/noTemplates'), config);
@@ -209,7 +215,9 @@ describe('Testing file cbtCompile.js', () => {
 
       // Convert from ES6 module import to IIFE like return value
       results = results.replace('export default', 'return');
-      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+      // Create a temporary function to test this compiled code.
+      var testFn = new Function(results); // eslint-disable-line no-new-func
       var templates = testFn();
 
       expect(templates.str('test1')).to.equal('<div>Content for Test1</div>');
@@ -237,7 +245,8 @@ describe('Testing file cbtCompile.js', () => {
 
       results = results.replace(/^import/mg, '//import');
 
-      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+      // Create a temporary function to test this compiled code.
+      var testFn = new Function(results); // eslint-disable-line no-new-func
       var templates = testFn();
 
       expect(templates.str('test1')).to.equal('<div>Content for Test1</div>');
@@ -251,8 +260,8 @@ describe('Testing file cbtCompile.js', () => {
         done(new Error('template compile succeded and should not have.'));
       }
 
-      catch(ex) {
-        expect(ex.message.substr(0,22)).to.equal('Invalid Template name:');
+      catch (ex) {
+        expect(ex.message.substr(0, 22)).to.equal('Invalid Template name:');
         done();
       }
     });
@@ -273,12 +282,14 @@ describe('Testing file cbtCompile.js', () => {
       results = results.replace('export default', 'return');
       results = results.replace('import locales from \'./locales.mjs\'', `function locales() {
         return {
-          "BUTTON_CANCEL": "取消",
-          "BUTTON_OK": "好"
+          BUTTON_CANCEL: "取消",
+          BUTTON_OK: "好"
         };
       }`);
       //showCode(results);
-      var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+      // Create a temporary function to test this compiled code.
+      var testFn = new Function(results); // eslint-disable-line no-new-func
       //showCode(testFn.toString());
       var templates = testFn();
 

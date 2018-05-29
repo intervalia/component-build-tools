@@ -1,17 +1,17 @@
 /* eslint-env mocha */
 const expect = require('chai').expect;
-const proxyquire =  require('proxyquire');
+const proxyquire = require('proxyquire');
 const fsOriginal = require('fs');
 const path = require('path');
 const cbtCompileMock = {};
 const fsMock = {
-  existsSync: (file) => true,
-  lstatSync: fsOriginal.lstatSync,
-  mkdirSync: (file) => 0o777,
-  readdirSync: fsOriginal.readdirSync,
-  renameSync: (fName, tName) => undefined,
-  writeFileSync: (file, data) => writtenFiles.push({file,data}),
-  unlinkSync: (file) => undefined,
+  'existsSync': file => true,
+  'lstatSync': fsOriginal.lstatSync,
+  'mkdirSync': file => 0o777,
+  'readdirSync': fsOriginal.readdirSync,
+  'renameSync': (fName, tName) => undefined, // eslint-disable-line no-undefined
+  'writeFileSync': (file, data) => writtenFiles.push({file, data}),
+  'unlinkSync': file => undefined, // eslint-disable-line no-undefined
   '@noCallThru': true
 };
 
@@ -62,11 +62,11 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(resp.length).to.equal(2);
     expect(resp[0].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[0].output.format).to.equal('es');
-    expect(resp[0].output.sourcemap).to.equal(undefined);
+    expect(resp[0].output.sourcemap).to.equal(undefined); // eslint-disable-line no-undefined
     expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.mjs');
     expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[1].output.format).to.equal('iife');
-    expect(resp[1].output.sourcemap).to.equal(undefined);
+    expect(resp[1].output.sourcemap).to.equal(undefined); // eslint-disable-line no-undefined
     expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.iife.js');
     expect(writtenFiles.length).to.equal(0);
   });
@@ -92,7 +92,9 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(writtenFiles[0].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/_compiled/locales.mjs');
 
     let results = writtenFiles[0].data.replace('export default', 'return');
-    var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+    // Create a temporary function to test this compiled code.
+    var testFn = new Function(results); // eslint-disable-line no-new-func
 
     // Get the `getLocaleStrings` function
     var locales = testFn();
@@ -105,7 +107,7 @@ describe('Testing file `rollup.root.config.js`', () => {
 
   it('should process a folder with one MSJ with templates and locales to compile', () => {
     let resp = rollupConfig.init({
-      buildTypes: [rollupConfig.BUILD_TYPES.IIFE5,rollupConfig.BUILD_TYPES.CJS,rollupConfig.BUILD_TYPES.CJS5],
+      buildTypes: [rollupConfig.BUILD_TYPES.IIFE5, rollupConfig.BUILD_TYPES.CJS, rollupConfig.BUILD_TYPES.CJS5],
       alwaysReturnFile: false,
       distPath: 'test/testFolders/rollupFolders/dist',
       makeMinFiles: true,
@@ -141,7 +143,9 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(writtenFiles[1].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocalesAndTemplates/one/_compiled/templates.mjs');
 
     let results = writtenFiles[0].data.replace('export default', 'return');
-    var testFn = new Function(results); // Create a temporary function to test this compiled code.
+
+    // Create a temporary function to test this compiled code.
+    var testFn = new Function(results); // eslint-disable-line no-new-func
 
     // Get the `getLocaleStrings` function
     var locales = testFn();

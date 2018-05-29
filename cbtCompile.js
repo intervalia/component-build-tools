@@ -26,7 +26,7 @@ const REPLACEMENT_MAP = {
 };
 const VALID_TEMPLATE_KEY_TEST_RE = /^[\w$][\w\d$]*$/;
 
-const readFile = filePath => fs.readFileSync(filePath, {'encoding': 'utf-8'}).trim().replace(/`/g, '\\`');
+const readFile = filePath => fs.readFileSync(filePath, {encoding: 'utf-8'}).trim().replace(/`/g, '\\`');
 
 /************************************************\
                  Public Functions
@@ -47,20 +47,18 @@ function locales(rootFolder, config) {
       // Return the processed results as an object of strings.
       return createMultiLocaleFiles(rootFolder, localeFileArray, config);
     }
-    else {
-      // Return the processed results as a single string.
-      return createSingleLocalesFile(rootFolder, localeFileArray, config);
-    }
+
+    // Return the processed results as a single string.
+    return createSingleLocalesFile(rootFolder, localeFileArray, config);
   }
   else if (config.alwaysReturnFile) {
     // If we are supposed to always return a file then return the
     // default file contents as a string
     return 'export default () => ({});';
   }
-  else {
-    // Indicate that no files were found
-    return false;
-  }
+
+  // Indicate that no files were found
+  return false;
 }
 
 /*
@@ -78,20 +76,18 @@ function templates(rootFolder, config, localeList) {
       // Return the processed results as a single string.
       return generateMultipleTemplates(rootFolder, templateFileArray, config, localeList);
     }
-    else {
-      // Return the processed results as a single string.
-      return generateTemplateOutput(rootFolder, templateFileArray, config, !!localeList);
-    }
+
+    // Return the processed results as a single string.
+    return generateTemplateOutput(rootFolder, templateFileArray, config, !!localeList);
   }
   else if (config.alwaysReturnFile) {
     // If we are supposed to always return a file then return the
     // default file contents as a string
     return `export default {dom:()=>null,str:()=>''};`;
   }
-  else {
-    // Indicate that no template files were found
-    return false;
-  }
+
+  // Indicate that no template files were found
+  return false;
 }
 
 /************************************************\
@@ -195,7 +191,7 @@ function readTranslations(rootFolder, fileList, config) {
 /*
  * Generate an array of locale file contents for every locale source file
  */
- // istanbul ignore next
+// istanbul ignore next
 function createMultiLocaleFiles(rootFolder, fileList, config) {
   throw new Error('Not implamented yet.');
   /*
@@ -242,20 +238,20 @@ function createSingleLocalesFile(rootFolder, fileList, config) {
     (str, locale, index) => {
       let filePath = translations[`${locale}filePath`];
       str +=  `  // Included locale file: .${filePath}\n`;
-      const strings = [];
+      const strs = [];
 
       translations.keys.forEach(
         (key, keyIndex) => {
           if (config.tagMissingStrings) {
-            strings.push(translations[locale][key] || `-*${translations[config.defaultLocale][key]}*-`);
+            strs.push(translations[locale][key] || `-*${translations[config.defaultLocale][key]}*-`);
           }
           else {
-            strings.push(translations[locale][key] || translations[config.defaultLocale][key]);
+            strs.push(translations[locale][key] || translations[config.defaultLocale][key]);
           }
         }
       );
 
-      str += `  "${locale}": ${JSON.stringify(strings)}${(index > len) ? '\n' : ',\n'}`;
+      str += `  "${locale}": ${JSON.stringify(strs)}${(index > len) ? '\n' : ',\n'}`;
 
       return str;
     }, '{\n'
@@ -354,17 +350,18 @@ function generateTemplateOutput(rootFolder, templateFiles, config, includeLocale
   const templateList = templateFiles.reduce(
     (str, filePath, i) => {
       let templateStr = readFile(filePath);
+      let script;
 
-      while(true) {
-        let script = templateStr.match(IMPORT_RE);
+      do {
+        script = templateStr.match(IMPORT_RE);
         if (script) {
-          templateStr = templateStr.replace(script[0],'').trim();
+          templateStr = templateStr.replace(script[0], '').trim();
           // TODO: Find a way to improve the imports
           script[1].trim().split(/[;\r\n]+/).forEach(
             line => {
               line = line.trim();
               if (line.length > 0) {
-                if (line.substr(0,7) !== 'import ') {
+                if (line.substr(0, 7) !== 'import ') {
                   throw new Error(`Only "import" is allowed: "${line}"`);
                 }
                 line+=';';
@@ -375,10 +372,8 @@ function generateTemplateOutput(rootFolder, templateFiles, config, includeLocale
             }
           );
         }
-        else {
-          break;
-        }
-      }
+      } while (script);
+
       // istanbul ignore else
       if (config.minTemplateWS) {
         templateStr = templateStr.replace(MULTI_WS_RE, ' ');
