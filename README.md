@@ -159,7 +159,7 @@ Template files tend to be HTML files but can be any kind of file. The templates 
 The template file `person.html`:
 
 ```html
-<div class="first">
+<div class="person">
   <div>Name: <span class="name">Frank N Stein</span></div>
 </div>
 ```
@@ -168,7 +168,7 @@ Would create a `templates.mjs` file with:
 
 ```JavaScript
   case 'person':
-    return `<div class="first"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
+    return `<div class="person"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
 ```
 
 ### Using locale strings in templates
@@ -186,7 +186,7 @@ Locale file: `./locales/strings_en.json`
 Template file: `./person.html`
 
 ```html
-<div class="first">
+<div class="person">
   <div>Name: <span class="name">${lang.NAME}</span></div>
 </div>
 ```
@@ -203,7 +203,7 @@ const lang = locales();
 templates.str = function(key, data) {
   switch(key) {
  	 case 'person';
- 	   return `<div class="first"> <div>Name: <span class="name">${lang.NAME}</span></div> </div>`;
+ 	   return `<div class="person"> <div>Name: <span class="name">${lang.NAME}</span></div> </div>`;
  	 .
  	 .
  	 .
@@ -219,7 +219,7 @@ Sometimes you need to be able to access external code within a template.
 In this example we need an external function called `name`.
 
 ```html
-<div class="first">
+<div class="person">
   <div>Name: <span class="name">${name("FRANK")}</span></div>
 </div>
 ```
@@ -230,7 +230,7 @@ To do this we can add the import to the template file like this:
 <%
 import name from "../name.mjs";
 %>
-<div class="first">
+<div class="person">
   <div>Name: <span class="name">${name("FRANK")}</span></div>
 </div>
 ```

@@ -1,1 +1,3 @@
 .nyc_output
+reports
+node_modules
