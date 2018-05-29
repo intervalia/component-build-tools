@@ -145,7 +145,7 @@ Currently we only support the 2 letter ISO 639-1 code and this ISO 639-1 code fo
 
 These locale files are combined into the file `./_compiled/locales.mjs` and you access them by importing that file and then calling the default function to get the set of locale strings for the specified locale.
 
-```JS
+```JavaScript
 import locales from "./_compiled/locales.mjs";
 const lang = locales('en');
 ```
@@ -166,7 +166,7 @@ The template file `person.html`:
 
 Would create a `templates.mjs` file with:
 
-```JS
+```JavaScript
   case 'person':
     return `<div class="first"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
 ```
@@ -179,7 +179,7 @@ Locale file: `./locales/strings_en.json`
 
 ```JSON
 {
-  NAME: "Frank N Stein"
+  "NAME": "Frank N Stein"
 }
 ```
 
@@ -193,7 +193,7 @@ Template file: `./person.html`
 
 Output in `./_compiled/templates.mjs`:
 
-```JS
+```JavaScript
 import locales from './locales.mjs';
 const lang = locales();
 .
