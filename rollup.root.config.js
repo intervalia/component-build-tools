@@ -3,6 +3,7 @@ const fs = require('fs');
 const cbtCompile = require('./cbtCompile');
 const glob = require('glob');
 const path = require('path');
+const getFileArrayFromGlob = require('./getFileArrayFromGlob');
 const PLUGIN_BUBLE = require('rollup-plugin-buble')({ transforms: { dangerousTaggedTemplateString: true } });
 const PLUGIN_UGLIFY = require('rollup-plugin-uglify-es')();
 const ROOT = process.cwd();
@@ -20,17 +21,23 @@ function init(theirConfig = {}) {
   const rollupOptionsArray = [];
   const config = Object.assign({
     addEOLocale: true, // Add the EO locale if it does not exist
-    addKELocale: true, // Add the KE locale if it does not exist
-    alwaysReturnFile: true,
-    buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.IIFE ],
+    addKELocale: false, // Add the KE locale if it does not exist
+    alwaysReturnFile: false,
+    buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.CJS ],
     debug: false,
     defaultLocale: 'en',
-    defaultLocaleVariable: 'window.locale',
+    defaultLocaleVariable: 'document.documentElement.lang',
     distPath: 'dist/js', // Path into which the distribution files will be placed
-    includePath: true, // Place the dist files inside their folder
+    dstExtCJS: '.cjs.js',
+    dstExtCJS5: '.cjs5.js',
+    dstExtIIFE: '.iife.js',
+    dstExtIIFE5: '.iife5.js',
+    dstExtMJS: '.mjs',
+    includePath: false, // Place the dist files in the distPath. `true` puts them in their own folder
     localeFiles: ['locales/strings_*.json'],
     makeMinFiles: false,
     minTemplateWS: true, // Minimize the white space for templates
+    plugins: [],
     separateByLocale: false,
     sourcemap: false,
     //srcFileName: 'wc.*.mjs',
@@ -43,54 +50,59 @@ function init(theirConfig = {}) {
     useStrict: false
   }, theirConfig);
 
-  config.srcFolders.forEach(
-    temp => {
+  var tempFolders = Array.isArray(config.srcFolders) ? config.srcFolders : [config.srcFolders];
+  const srcFolders = getFileArrayFromGlob(ROOT, tempFolders);
+
+  srcFolders.forEach(
+    tempPath => {
       const srcList = [];
-      const srcRoot = path.join(ROOT, temp);
-      const label = `Processing Locales and Templates for ${temp}`;
+      const srcRoot = path.dirname(tempPath);
+      const temp = path.basename(tempPath);
 
-      console.time(label);
-      fs.readdirSync(srcRoot).forEach(
-        (tempPath) => {
-          if (fs.lstatSync(path.join(srcRoot, tempPath)).isDirectory()) {
-            let fname = config.srcFileName || `${tempPath}.mjs`;
-            let componentFile = getSrcFiles(srcRoot, tempPath, fname)[0];
+      if (fs.lstatSync(tempPath).isDirectory()) {
+        let fname = config.srcFileName || `${temp}.mjs`;
+        let componentFile = getSrcFiles(tempPath, fname)[0];
 
-            // istanbul ignore else
-            if (componentFile && fs.existsSync(componentFile)) {
-              srcList.push({
-                srcPath: tempPath
-              });
+        // istanbul ignore else
+        if (componentFile && fs.existsSync(componentFile)) {
+          const label = `Processing Locales and Templates for ${temp}`;
+          console.time(label);
 
-              let localeList = false;
-              let componentPath = path.join(srcRoot, tempPath);
-              // TODO: If we are compiling for each locale then we need to repeat the `srcList.push`
+          srcList.push({
+            srcPath: temp
+          });
 
-              let localeCode = cbtCompile.locales(componentPath, config);
-              // istanbul ignore if
-              if (typeof localeCode === 'object') {
-                // Create one file per locale
-                localeList = Object.keys(localeCode);
-                localeList.forEach(
-                  (key) => {
-                    writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName.replace('.mjs', `_${key}.mjs`)), localeCode[key]);
-                  }
-                );
+          let localeList = false;
+          let componentPath = path.join(tempPath);
+          // TODO: If we are compiling for each locale then we need to repeat the `srcList.push`
+
+          let localeCode = cbtCompile.locales(componentPath, config);
+          // istanbul ignore if
+          if (typeof localeCode === 'object') {
+            // Create one file per locale
+            localeList = Object.keys(localeCode);
+            localeList.forEach(
+              (key) => {
+                writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName.replace('.mjs', `_${key}.mjs`)), localeCode[key]);
               }
-              else if (localeCode) {
-                localeList = true;
-                writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName), localeCode);
-              }
-
-              let templateCode = cbtCompile.templates(componentPath, config, localeList);
-              if (templateCode) {
-                writeFile(path.join(componentPath, config.tempPath, config.tempTemplateName), templateCode);
-              }
-            }
+            );
           }
+          else if (localeCode) {
+            localeList = true;
+            writeFile(path.join(componentPath, config.tempPath, config.tempLocalesName), localeCode);
+          }
+
+          let templateCode = cbtCompile.templates(componentPath, config, localeList);
+          if (templateCode) {
+            writeFile(path.join(componentPath, config.tempPath, config.tempTemplateName), templateCode);
+          }
+
+          console.timeEnd(label);
         }
-      );
-      console.timeEnd(label);
+        else {
+          return;
+        }
+      }
 
       srcList.forEach(
         ({ varName, srcPath, srcFile = config.srcFileName || srcPath + '.mjs', buildTypes }, index) => {
@@ -110,8 +122,10 @@ function init(theirConfig = {}) {
               let format = buildType;
               let transpile = false;
               let dstName = srcPath;
+              let plugins = [...config.plugins];
+
               if (buildType === BUILD_TYPES.IIFE5) {
-                dstName += '.iife5.js';
+                dstName += config.dstExtIIFE5;
                 transpile = true;
                 format = BUILD_TYPES.IIFE;
                 // istanbul ignore else
@@ -120,22 +134,22 @@ function init(theirConfig = {}) {
                 }
               }
               else if (buildType === BUILD_TYPES.IIFE) {
-                dstName += '.iife.js';
+                dstName += config.dstExtIIFE;
                 // istanbul ignore else
                 if (!varName) {
                   varName = srcPath.replace(/[.-]/g, '_');
                 }
               }
               else if (buildType === BUILD_TYPES.CJS5) {
-                dstName += '.cjs5.js';
+                dstName += config.dstExtCJS5;
                 transpile = true;
                 format = BUILD_TYPES.CJS;
               }
               else if (buildType === BUILD_TYPES.CJS) {
-                dstName += '.cjs.js';
+                dstName += config.dstExtCJS;
               }
               else {
-                dstName += '.mjs';
+                dstName += config.dstExtMJS;
               }
 
               var outputPath = config.distPath || 'dist';
@@ -143,7 +157,7 @@ function init(theirConfig = {}) {
 
               const buildItem = {
                 input,
-                plugins: [],
+                plugins,
                 output: {
                   file,
                   format,

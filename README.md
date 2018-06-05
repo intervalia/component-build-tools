@@ -151,9 +151,9 @@ const lang = locales('en');
 
 ## Templates
 
-Template files tend to be HTML files but can be any kind of file. The templates are embedded into a template literal inside of the `template.mjs` file.
+Template files tend to be HTML files but can be any kind of file. As a result of the compile process the contents of the template files are embedded into a template literal inside of the `template.mjs` file.
 
-The template file `person.html`:
+For example, if there is a template file called `person.html`:
 
 ```html
 <div class="person">
@@ -161,12 +161,93 @@ The template file `person.html`:
 </div>
 ```
 
-Would create a `templates.mjs` file with:
+Then the entry generated in the `templates.mjs` file would be:
 
 ```JavaScript
   case 'person':
     return `<div class="person"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
 ```
+
+### The back-tick: ```
+
+Since all templates become ES6 Template literals you can do some creative things in your tempalte files. Let's say that you want to create a `<table>` with 5 rows. You could do it like this:
+
+```html
+<table>
+  <tr class="row1">
+    <td>1</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>
+  <tr class="row2">
+    <td>1</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>
+  <tr class="row3">
+    <td>3</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>
+  <tr class="row4">
+    <td>4</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>
+  <tr class="row5">
+    <td>5</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>
+</table>
+```
+
+Or you can embed an second ES6 template literal within your template:
+
+```html
+<table>
+  ${[1,2,3,4,5].map( i => `<tr class="row${i}">
+    <td>${i}</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>`).join('')}
+</table>
+```
+
+When you get this string it will execute this template literal expression:
+
+```javascript
+[1,2,3,4,5].map( i => `<tr class="row${i}">
+  <td>${i}</td>
+  <td class="name"></td>
+  <td class="age"></td>
+</tr>`).join('')
+```
+
+This, in turn will return five copies of the internal HTML (The `<tr>` with its three `<td>` tags). THe `join('')` will convert them into a string and this will be inserted just inside the `<table>` tags.
+
+The end result of the two example above are almost identical. Since we removed the duplication of code the second example is more flexible and less prone to errors.
+
+---
+
+#### Escaping the back-tick
+
+If you need to add a back-tick ``` character into your template, outside of your template literals, then you must escape it like with the backslash, like this:
+
+```
+  <p>This is the back-tick: \`</p>
+```
+
+This allows the back-tick to exist as a stand alone character and not as the ending of the generated template literal.
+
+The compiled output would be this:
+
+```
+return `<p>This is the back-tick: \`</p>`;
+```
+
+---
+
 
 ### Using locale strings in templates
 
@@ -208,6 +289,36 @@ templates.str = function(key, data) {
 }
 ```
 
+### Passing data into a template
+
+The signature of the functions `tempates.str` and `tempaltes.dom` is:
+
+```
+function(key, data) {}
+```
+
+So when your code calls either `tempates.str` and `tempaltes.dom` you can pass any object as the second parameter.
+
+> The first parameter is they key used to get the correct template.
+
+If you wanted to create a table with an number or rows defined by a variable you would create your template like this:
+
+Template file `content.html`:
+
+```html
+<table>
+  ${[...Array(data.size).keys()].map( i => `<tr class="row${i}">
+    <td>${i}</td>
+    <td class="name"></td>
+    <td class="age"></td>
+  </tr>`).join('')}
+</table>
+```
+
+If you called `templates.str('content', {size: 10})` then you would get 10 rows created. If you called `templates.str('content', {size: 87})` then you would get 87 rows created.
+
+You can pass in any data and use it any way your imagination can imagine. You just need to follow the rules for [template literals](http://devdocs.io/javascript/template_literals).
+
 ### Adding an `import` in a template
 
 Sometimes you need to be able to access external code within a template.
@@ -239,10 +350,9 @@ The import line of code will be inserted into the top of `templates.mjs`. _You c
 
 | Date | Version | Description |
 | --- | --- | --- |
+| 06/05/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in tempaltes. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types |
 | 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. Added Travis and Code Climate. |
 | 05/10/2018 | 1.0.2 | &#x25cf; Corrected REGEX to get correct file names for locale files.<br/>&#x25cf; Improved error output to simplify debugging. |
 | 04/03/2018 | 1.0.1 | &#x25cf; Added pre-commit tests. |
 | 03/29/2018 | 1.0.0 | &#x25cf; Added options for `addKELocale`, `defaultLocaleVariable ` and `sourcemap`.<br/>&#x25cf; Spelling Correction: Renamed option `minTempalteWS` to `minTemplateWS`.<br/>&#x25cf; If there are no compiled files to generate and `alwaysReturnFile` if set to `false` then no temporary folder is created. |
 | 02/26/2018 | 0.0.0 | Initial Release. |
-
-

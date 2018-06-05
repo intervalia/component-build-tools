@@ -54,28 +54,28 @@ describe('Testing file `rollup.root.config.js`', () => {
 
   it('should process a folder with one MSJ to compile', () => {
     let resp = rollupConfig.init({
-      alwaysReturnFile: false,
       distPath: 'test/testFolders/rollupFolders/dist',
-      srcFolders: ['test/testFolders/rollupFolders/onlyOneMJS']
+      srcFolders: ['test/testFolders/rollupFolders/onlyOneMJS/one']
     });
 
     expect(resp.length).to.equal(2);
     expect(resp[0].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[0].output.format).to.equal('es');
     expect(resp[0].output.sourcemap).to.equal(undefined); // eslint-disable-line no-undefined
-    expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.mjs');
+    expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.mjs');
     expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
-    expect(resp[1].output.format).to.equal('iife');
+    expect(resp[1].output.format).to.equal('cjs');
     expect(resp[1].output.sourcemap).to.equal(undefined); // eslint-disable-line no-undefined
-    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.iife.js');
+    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.cjs.js');
     expect(writtenFiles.length).to.equal(0);
   });
 
   it('should process a folder with one MSJ with locales to compile', () => {
     let resp = rollupConfig.init({
-      alwaysReturnFile: false,
+      addKELocale: true,
+      includePath: true,
       distPath: 'test/testFolders/rollupFolders/dist',
-      srcFolders: ['test/testFolders/rollupFolders/MJSWithLocales'],
+      srcFolders: ['test/testFolders/rollupFolders/MJSWithLocales/*'],
       sourcemap: true
     });
 
@@ -85,9 +85,9 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(resp[0].output.sourcemap).to.equal(true);
     expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.mjs');
     expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/one.mjs');
-    expect(resp[1].output.format).to.equal('iife');
+    expect(resp[1].output.format).to.equal('cjs');
     expect(resp[1].output.sourcemap).to.equal(true);
-    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.iife.js');
+    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.cjs.js');
     expect(writtenFiles.length).to.equal(1);
     expect(writtenFiles[0].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/_compiled/locales.mjs');
 
@@ -107,11 +107,11 @@ describe('Testing file `rollup.root.config.js`', () => {
 
   it('should process a folder with one MSJ with templates and locales to compile', () => {
     let resp = rollupConfig.init({
+      addKELocale: true,
       buildTypes: [rollupConfig.BUILD_TYPES.IIFE5, rollupConfig.BUILD_TYPES.CJS, rollupConfig.BUILD_TYPES.CJS5],
-      alwaysReturnFile: false,
       distPath: 'test/testFolders/rollupFolders/dist',
       makeMinFiles: true,
-      srcFolders: ['test/testFolders/rollupFolders/MJSWithLocalesAndTemplates'],
+      srcFolders: ['test/testFolders/rollupFolders/MJSWithLocalesAndTemplates/*'],
       sourcemap: true
     });
 
