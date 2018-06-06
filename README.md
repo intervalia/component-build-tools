@@ -170,7 +170,7 @@ Then the entry generated in the `templates.mjs` file would be:
 
 ### The back-tick: ```
 
-Since all templates become ES6 Template literals you can do some creative things in your tempalte files. Let's say that you want to create a `<table>` with 5 rows. You could do it like this:
+Since all templates become ES6 Template literals you can do some creative things in your template files. Let's say that you want to create a `<table>` with 5 rows. You could do it like this:
 
 ```html
 <table>
@@ -291,17 +291,17 @@ templates.str = function(key, data) {
 
 ### Passing data into a template
 
-The signature of the functions `tempates.str` and `tempaltes.dom` is:
+The signature of the functions `templates.str` and `templates.dom` is:
 
 ```
 function(key, data) {}
 ```
 
-So when your code calls either `tempates.str` and `tempaltes.dom` you can pass any object as the second parameter.
+So when your code calls either `templates.str` and `templates.dom` you can pass any object as the second parameter.
 
 > The first parameter is they key used to get the correct template.
 
-If you wanted to create a table with an number or rows defined by a variable you would create your template like this:
+If you wanted to create a table with a number of rows defined by a variable you would create your template like this:
 
 Template file `content.html`:
 
@@ -350,7 +350,7 @@ The import line of code will be inserted into the top of `templates.mjs`. _You c
 
 | Date | Version | Description |
 | --- | --- | --- |
-| 06/05/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in tempaltes. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types |
+| 06/05/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in templates. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types |
 | 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. Added Travis and Code Climate. |
 | 05/10/2018 | 1.0.2 | &#x25cf; Corrected REGEX to get correct file names for locale files.<br/>&#x25cf; Improved error output to simplify debugging. |
 | 04/03/2018 | 1.0.1 | &#x25cf; Added pre-commit tests. |
