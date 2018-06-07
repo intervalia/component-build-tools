@@ -18,7 +18,7 @@ You will also need to install the latest `rollup` in your project
 
 ## Usage
 
-Here is a sample `rollup.config.js` file:
+Here are two sample `rollup.config.js` files:
 
 ```JavaScript
 const rollup = require('./node_modules/component-build-tools/rollup.root.config');
@@ -31,9 +31,24 @@ const config = {
 module.exports = rollup.init(config);
 ```
 
+and
+
+```JavaScript
+const {init, BUILD_TYPES} = require('./node_modules/component-build-tools/rollup.root.config');
+
+const config = {
+  buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.CJS, BUILD_TYPES.CJS5 ],
+  srcFolders: ['assets/*']
+};
+
+module.exports = init(config);
+```
+
 Then, to run rollup:
 
-    ./node_modules/.bin/rollup -c
+```shell
+./node_modules/.bin/rollup -c
+```
 
 ## Options
 
@@ -56,27 +71,44 @@ When you call `rollup.init` you pass in a set of options. Most are optional. The
 | Option | Type | Default Value | Description |
 | --- | --- | --- | --- |
 | addEOLocale | bool | `true` | Add the EO (Esperanto) locale if it does not exist. |
-| addKELocale | bool | `true` | Add the KE locale if it does not exist. This is a fake locale that returns the KEY as the string to help in debugging. |
-| alwaysReturnFile | bool | `true` | The files `_compiled/locales.msj` and `_compiled/templates.mjs` will always be created if this value is `true`. Otherwise they will not be created. |
+| addKELocale | bool | `false` | Add the KE locale if it does not exist. This is a fake locale that returns the KEY as the string to help in debugging. |
+| alwaysReturnFile | bool | `false` | The files `_compiled/locales.msj` and `_compiled/templates.mjs` will always be created if this value is `true`. Otherwise they will not be created. |
 | buildTypes |array | `[`<br/>&nbsp;&nbsp;`BUILD_TYPES.MJS,`<br/>&nbsp;&nbsp;`BUILD_TYPES.IIFE`<br/>`]` | The list of build styles to create. See Build Styles above. |
 | debug | bool | `false` | `true` to enable debug output. |
 | defaultLocale | string | `'en'` | The locale to use as the default locale when compiling locale files. |
-| defaultLocaleVariable | string | `'window.locale'` | The variable to use as the default locale that is read at runtime that your app defines. |
-| distPath | string | `'dist/js'` | Path into which the distribution files will be placed.|
-| includePath | bool | `true` | Place the dist files inside a folder named after the source folder. |
-| localeFiles | array | `['locales/strings_*.json']` | An array of relative globby paths defining the locale files to load. |
+| defaultLocaleVariable | string | `'document.documentElement.lang'` | The variable to use as the default locale that is read at runtime that your app defines.<br/>`document.documentElement.lang` is the value stored in the `lang` attribute of the `<html>` tag. Changing that value will change what locale strings are used.<br/>`<html lang='en'>` will use the `'en'` locale strings.<br/>`<html lang="fr">` will use the `'fr'` locale strings. |
+| distPath | string/object | `'dist/js'` | Path into which the distribution files will be placed.<br/>If `distPath` is an object then it must include one entry per output type defined in `buildTypes`.<br/>_See [`distPath`](#distPath) below._ |
+| includePath | bool | `false` | If this is set to `false` then the output files are placed directly into the `distPath` folder. If this is set to `true` then the output files are placed in a child folder named after the source folder inside the `distPath` folder. |
+| localeFiles | array | `['locales/strings_*.json']` | An array of relative glob paths defining the locale files to load. |
 | makeMinFiles | bool | `false` | If set to `true` then the output will include creating minimized files. |
 | minTemplateWS | bool | `true` | Minimize the white space within the template files. |
-| separateByLocale | bool | `false` | **Currently not supported** When `true` this will generate one output file per locale supported in the `localesFile` globby list. `false` will only produce one file with all locale data embeded. |
+| separateByLocale | bool | `false` | **Currently not supported** When `true` this will generate one output file per locale supported in the `localesFile` glob list. `false` will only produce one file with all locale data embedded. |
 | sourcemap  | bool | `false` | If `true` then sourcemap files are generated. If `false` then sourcemap files are not generated. |
 | srcFileName | string | `undefined` | If undefined then we use the folder name to specify the source file name. Otherwise the `srcFileName` string is used.<br/>_See [`srcFileName`](#srcFileName) below._ |
-| srcFolders | array | `[]` | Which folders to look into for source files.<br/>**This is required**<br/>_See [`srcFolders`](#srcFolders) below._ |
+| srcFolders | string/array | `[]` | An array of glob folders in which to look into for source files.<br/>**This is required. The user must supply this value.**<br/>_See [`srcFolders`](#srcFolders) below._ |
 | tagMissingStrings | bool | `true` | When `true` Mark missing locale strings so they are easily seen. |
-| templateFiles | array | `['*.html']` | A globby array of files to include as templates. |
+| templateFiles | array | `['*.html']` | A glob array of files to include as templates. |
 | tempLocalesName | string | `'locales.mjs'` | The filename used for the compiled `locales` file. |
 | tempPath | string | `'./_compiled/'` | The path into which all compiled files are place. |
 | tempTemplateName | string | `'templates.mjs'` | The filename used for the compiled `templates` file. |
 | useStrict | bool | `false` | If `true` then add `"use strict"` at the top of the rolled up output files. |
+
+#### distPath
+
+If `distPath` is a string then the same `distPath` is used in the output for any build type.
+
+You can also define `distPath` as an object to change the output path for each build type.
+
+If you  set `buildType` to `[BUILD_TYPES.MJS, BUILD_TYPES.CJS]` then your `distPath` object needs to include two properties, one per build type:
+
+```JavaScript
+distPath: {
+  MJS: './path/for/mjs/built/files',
+  CJS: './cjs/file/path'
+}
+```
+
+> If you include extra properties they will be ignored. But you must include one property per build type. If you don't then an exception will be thrown and the build will fail.
 
 #### srcFileName
 
@@ -84,51 +116,62 @@ If `srcFileName` is left as `undefined` then the name of the source files will b
 
 For example, the file structure below shows a folder named `test1` and within it is a file named `test1.mjs`. The build process of the build tools will take `test1.mjs` as the root file to use in the rollup config file.
 
-```
-+- components
-   +- test1
-      +- test1.msj
-      +- style.html
-      +- content.html
+```shell
+└─ components
+   └─ test1
+      ├─ test1.msj
+      ├─ style.html
+      └─ content.html
 ```
 
 And the default output file will be placed in:
 
-```
-+- dist
-   +- js
-      +- test1
-         +- test1.mjs
+```shell
+└─ dist
+   └─ js
+      └─ test1.mjs
 ```
 
 The output file `./dist/js/test1/test1.mjs` will combine the two template files `style.html` and `content.html` as well as the source file `test1.js` as one set of code.
 
 If `srcFileName` were set to `index.mjs` then the build tools would use `index.msj` as the root file to use in the rollup config file.
 
-```
-+- components
-   +- test1
-      +- index.msj
-      +- style.html
-      +- content.html
+```shell
+└─ components
+   └─ test1
+      ├─ index.msj
+      ├─ style.html
+      └─ content.html
 ```
 
 would still produce the same output structure of:
 
+```shell
+└─ dist
+   └─ js
+      └─ test1.mjs
 ```
-+- dist
-   +- js
-      +- test1
-         +- test1.mjs
+
+If the value for `includePath` had been set to true then the output structure would be:
+
+```shell
+└─ dist
+   └─ js
+      └─ test1
+         └─ test1.mjs
 ```
 
 #### srcFolders
 
 `srcFolder` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
 
-If you have all of your components in the folder `./comps` then you would call `rollup.init({srcFolders:['./comps']})`.
+If you have all of your components stored in child fodlers of the folder `./comps` then you would call `rollup.init({srcFolders:['./comps/*']})`.
 
 Every folder directly under `./comps` would get processed. Any subfolder that was found to match the requirements of a component will be handed off to rollup for further processing.
+
+You can specify each folder independently within the array, And each entry in the array can either be a real path to a specific folder or a glob path to a set of folders.
+
+> `rollup.init({srcFolders:['./comps/component1']})` will only look at the path `./comps/component1` while `rollup.init({srcFolders:['./comps/*']})` will look at all direct child folders under `./comps`.
 
 ## Locale files
 
@@ -164,8 +207,8 @@ For example, if there is a template file called `person.html`:
 Then the entry generated in the `templates.mjs` file would be:
 
 ```JavaScript
-  case 'person':
-    return `<div class="person"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
+case 'person':
+  return `<div class="person"> <div>Name: <span class="name">Frank N Stein</span></div> </div>`;
 ```
 
 ### The back-tick: ```
@@ -216,7 +259,7 @@ Or you can embed an second ES6 template literal within your template:
 
 When you get this string it will execute this template literal expression:
 
-```javascript
+```JavaScript
 [1,2,3,4,5].map( i => `<tr class="row${i}">
   <td>${i}</td>
   <td class="name"></td>
@@ -234,15 +277,15 @@ The end result of the two example above are almost identical. Since we removed t
 
 If you need to add a back-tick ``` character into your template, outside of your template literals, then you must escape it like with the backslash, like this:
 
-```
-  <p>This is the back-tick: \`</p>
+```html
+<p>This is the back-tick: \`</p>
 ```
 
 This allows the back-tick to exist as a stand alone character and not as the ending of the generated template literal.
 
 The compiled output would be this:
 
-```
+```JavaScript
 return `<p>This is the back-tick: \`</p>`;
 ```
 
@@ -293,7 +336,7 @@ templates.str = function(key, data) {
 
 The signature of the functions `templates.str` and `templates.dom` is:
 
-```
+```JavaScript
 function(key, data) {}
 ```
 
@@ -350,7 +393,7 @@ The import line of code will be inserted into the top of `templates.mjs`. _You c
 
 | Date | Version | Description |
 | --- | --- | --- |
-| 06/05/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in templates. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types |
+| 06/07/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in templates. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types.<br/>&#x25cf; Added ability for `distPath` to be an object and not just a string.<br/>&#x25cf; Added and cleaned up Docs<br/>&#x25cf; Added more testing for the new code. |
 | 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. Added Travis and Code Climate. |
 | 05/10/2018 | 1.0.2 | &#x25cf; Corrected REGEX to get correct file names for locale files.<br/>&#x25cf; Improved error output to simplify debugging. |
 | 04/03/2018 | 1.0.1 | &#x25cf; Added pre-commit tests. |

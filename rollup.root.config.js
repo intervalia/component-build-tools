@@ -4,15 +4,16 @@ const cbtCompile = require('./cbtCompile');
 const glob = require('glob');
 const path = require('path');
 const getFileArrayFromGlob = require('./getFileArrayFromGlob');
+const DIST_PATH_DEFAULT = 'dist/js';
 const PLUGIN_BUBLE = require('rollup-plugin-buble')({ transforms: { dangerousTaggedTemplateString: true } });
 const PLUGIN_UGLIFY = require('rollup-plugin-uglify-es')();
 const ROOT = process.cwd();
 const BUILD_TYPES = {
-  IIFE: 'iife', // IFFE output
-  IIFE5: 'iife5', // IFFE output with ES5 transpile
-  CJS: 'cjs', // Common JS (require)
-  CJS5: 'cjs5', // Common JS (require) with ES5 transpile
-  MJS: 'es' // ES6 Modules (import)
+  IIFE: 'IIFE', // IFFE output
+  IIFE5: 'IIFE5', // IFFE output with ES5 transpile
+  CJS: 'CJS', // Common JS (require)
+  CJS5: 'CJS5', // Common JS (require) with ES5 transpile
+  MJS: 'MJS' // ES6 Modules (import)
 };
 const globOptions = { cwd: '/', root: '/' };
 const getSrcFiles = (...pathParts) => glob.sync(path.resolve(...pathParts), globOptions);
@@ -27,7 +28,7 @@ function init(theirConfig = {}) {
     debug: false,
     defaultLocale: 'en',
     defaultLocaleVariable: 'document.documentElement.lang',
-    distPath: 'dist/js', // Path into which the distribution files will be placed
+    distPath: DIST_PATH_DEFAULT, // Path into which the distribution files will be placed
     dstExtCJS: '.cjs.js',
     dstExtCJS5: '.cjs5.js',
     dstExtIIFE: '.iife.js',
@@ -49,6 +50,8 @@ function init(theirConfig = {}) {
     tempTemplateName: 'templates.mjs',
     useStrict: false
   }, theirConfig);
+
+  validateConfig(config);
 
   var tempFolders = Array.isArray(config.srcFolders) ? config.srcFolders : [config.srcFolders];
   const srcFolders = getFileArrayFromGlob(ROOT, tempFolders);
@@ -119,41 +122,11 @@ function init(theirConfig = {}) {
 
           config.buildTypes.forEach(
             buildType => {
-              let format = buildType;
-              let transpile = false;
-              let dstName = srcPath;
-              let plugins = [...config.plugins];
-
-              if (buildType === BUILD_TYPES.IIFE5) {
-                dstName += config.dstExtIIFE5;
-                transpile = true;
-                format = BUILD_TYPES.IIFE;
-                // istanbul ignore else
-                if (!varName) {
-                  varName = srcPath.replace(/[.-]/g, '_');
-                }
+              const plugins = [...config.plugins];
+              const { format, needToTranspile, outputPath, file } = getBuildStepInfo(buildType, srcPath, varName, config);
+              if (needToTranspile) {
+                plugins.push(PLUGIN_BUBLE);
               }
-              else if (buildType === BUILD_TYPES.IIFE) {
-                dstName += config.dstExtIIFE;
-                // istanbul ignore else
-                if (!varName) {
-                  varName = srcPath.replace(/[.-]/g, '_');
-                }
-              }
-              else if (buildType === BUILD_TYPES.CJS5) {
-                dstName += config.dstExtCJS5;
-                transpile = true;
-                format = BUILD_TYPES.CJS;
-              }
-              else if (buildType === BUILD_TYPES.CJS) {
-                dstName += config.dstExtCJS;
-              }
-              else {
-                dstName += config.dstExtMJS;
-              }
-
-              var outputPath = config.distPath || 'dist';
-              var file = config.includePath ? path.resolve(ROOT, outputPath, srcPath, dstName) : path.resolve(ROOT, outputPath, dstName);
 
               const buildItem = {
                 input,
@@ -162,28 +135,17 @@ function init(theirConfig = {}) {
                   file,
                   format,
                   name: varName,
-                  strict: config.useStrict || false
+                  strict: config.useStrict,
+                  sourcemap: config.sourcemap
                 }
               };
 
-              if (transpile) {
-                buildItem.plugins.push(PLUGIN_BUBLE);
-              }
-
-              if (config.sourcemap) {
-                buildItem.output.sourcemap = true;
-              }
               rollupOptionsArray.push(buildItem);
 
               if (config.makeMinFiles) {
                 const buildItem2 = Object.assign({}, buildItem);
-                buildItem2.plugins = [];
-                if (transpile) {
-                  buildItem2.plugins.push(PLUGIN_BUBLE);
-                }
-                buildItem2.plugins.push(PLUGIN_UGLIFY);
-                buildItem2.output = Object.assign({}, buildItem.output);
-                buildItem2.output.file = buildItem.output.file.replace(/(.[a-z]{2,3}$)/, '.min$1');
+                buildItem2.plugins = [...buildItem2.plugins, PLUGIN_UGLIFY]; // Keep this set of plugins separated from the other set.
+                buildItem2.output = Object.assign({}, buildItem.output, {file: buildItem.output.file.replace(/(.[a-z]+$)/, '.min$1')});
                 rollupOptionsArray.push(buildItem2);
               }
             }
@@ -194,6 +156,88 @@ function init(theirConfig = {}) {
   );
 
   return rollupOptionsArray;
+}
+
+function validateConfig(config) {
+  if (![true, false, 'inline'].includes(config.sourcemap)) {
+    throw new TypeError('The value for `config.sourcemap` must be [true | false | "inline"].');
+  }
+
+  if (!Array.isArray(config.buildTypes)) {
+    throw new TypeError(`The value for \`config.buildTypes\` is invalid.`);
+  }
+
+  config.buildTypes.forEach(
+    item => {
+      if (!Object.values(BUILD_TYPES).includes(item)) {
+        throw new TypeError(`The \`config.buildTypes\` value of \`${item}\` is invalid.`);
+      }
+    }
+  );
+
+  if (typeof config.distPath !== 'string') {
+    if (typeof config.distPath === 'object') {
+      config.buildTypes.forEach(
+        item => {
+          if (!config.distPath[item]) {
+            throw new TypeError(`The value for \`config.distPath.${item}\` is missing.`);
+          }
+        }
+      );
+    }
+    else {
+      throw new TypeError('The value for \`config.distPath\` must be a \`string\` or an \`object\`.');
+    }
+  }
+}
+
+function getBuildStepInfo(buildType, srcPath, varName, config) {
+  let format = buildType;
+  let needToTranspile = false;
+  let dstName = srcPath;
+  let outputPath = config.distPath;
+
+  // If `config.distPath` is an object then we need to get the correct path out of the object.
+  if (typeof outputPath === 'object') {
+    outputPath = outputPath[buildType];
+  }
+
+  if (buildType === BUILD_TYPES.IIFE5) {
+    dstName += config.dstExtIIFE5;
+    needToTranspile = true;
+    format = BUILD_TYPES.IIFE;
+    // istanbul ignore else
+    if (!varName) {
+      varName = srcPath.replace(/[.-]/g, '_');
+    }
+  }
+  else if (buildType === BUILD_TYPES.IIFE) {
+    dstName += config.dstExtIIFE;
+    // istanbul ignore else
+    if (!varName) {
+      varName = srcPath.replace(/[.-]/g, '_');
+    }
+  }
+  else if (buildType === BUILD_TYPES.CJS5) {
+    dstName += config.dstExtCJS5;
+    needToTranspile = true;
+    format = BUILD_TYPES.CJS;
+  }
+  else if (buildType === BUILD_TYPES.CJS) {
+    dstName += config.dstExtCJS;
+  }
+  else {
+    dstName += config.dstExtMJS;
+    format = 'es';
+  }
+
+  format = format.toLowerCase();
+
+  const file = config.includePath ? path.resolve(ROOT, outputPath, srcPath, dstName) : path.resolve(ROOT, outputPath, dstName);
+
+  return {
+    format, needToTranspile, outputPath, file
+  };
 }
 
 function createFolders(filePath) {
