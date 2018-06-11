@@ -1,6 +1,6 @@
 {
   "name": "component-build-tools",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A set of build tools to simplify the creation of components",
   "main": "rollup.root.config.js",
   "author": "Michael G Collins <intervalia@gmail.com> http://www.intervalia.com/",
