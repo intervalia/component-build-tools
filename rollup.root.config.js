@@ -123,7 +123,7 @@ function init(theirConfig = {}) {
           config.buildTypes.forEach(
             buildType => {
               const plugins = [...config.plugins];
-              const { format, needToTranspile, outputPath, file } = getBuildStepInfo(buildType, srcPath, varName, config);
+              const { format, needToTranspile, outputPath, file, name } = getBuildStepInfo(buildType, srcPath, varName, config);
               if (needToTranspile) {
                 plugins.push(PLUGIN_BUBLE);
               }
@@ -134,7 +134,7 @@ function init(theirConfig = {}) {
                 output: {
                   file,
                   format,
-                  name: varName,
+                  name,
                   strict: config.useStrict,
                   sourcemap: config.sourcemap
                 }
@@ -236,7 +236,7 @@ function getBuildStepInfo(buildType, srcPath, varName, config) {
   const file = config.includePath ? path.resolve(ROOT, outputPath, srcPath, dstName) : path.resolve(ROOT, outputPath, dstName);
 
   return {
-    format, needToTranspile, outputPath, file
+    format, needToTranspile, outputPath, file, name: varName
   };
 }
 

@@ -268,9 +268,11 @@ describe('Testing file `rollup.root.config.js`', () => {
 
     expect(resp.length).to.equal(8);
     expect(resp[0].output.format).to.equal('iife');
+    expect(resp[0].output.name).to.equal('one');
     expect(resp[0].plugins.length).to.equal(1, 'iife only buble');
     expect(resp[0].plugins[0].name).to.equal('buble');
     expect(resp[1].output.format).to.equal('iife');
+    expect(resp[1].output.name).to.equal('one');
     expect(resp[1].plugins.length).to.equal(2, 'iife buble and uglify');
     expect(resp[1].plugins[0].name).to.equal('buble');
     expect(resp[1].plugins[1].name).to.equal('uglify');
@@ -290,8 +292,10 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(resp[5].plugins[1].name).to.equal('uglify');
 
     expect(resp[6].output.format).to.equal('iife');
+    expect(resp[6].output.name).to.equal('one');
     expect(resp[6].plugins.length).to.equal(0, 'iife');
     expect(resp[7].output.format).to.equal('iife');
+    expect(resp[7].output.name).to.equal('one');
     expect(resp[7].plugins.length).to.equal(1, 'iife and uglify');
     expect(resp[7].plugins[0].name).to.equal('uglify');
 
