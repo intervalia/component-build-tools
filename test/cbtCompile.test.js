@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 const path = require('path');
 const expect = require('chai').expect;
-const cbtCompile = require('../cbtCompile');
+const cbtCompile = require('../lib/cbtCompile');
 const ROOT = process.cwd();
 
 function showCode(code) {

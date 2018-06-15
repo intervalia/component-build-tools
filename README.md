@@ -10,7 +10,7 @@ For those of you that have used [gulp-component-assembler](https://www.npmjs.com
 
 You need to install the component build tools in your project:
 
-    npm install --save-dev git+https://github.com/intervalia/component-build-tools.git
+    npm install --save-dev component-build-tools
 
 You will also need to install the latest `rollup` in your project
 
@@ -21,7 +21,7 @@ You will also need to install the latest `rollup` in your project
 Here are two sample `rollup.config.js` files:
 
 ```JavaScript
-const rollup = require('./node_modules/component-build-tools/rollup.root.config');
+const rollup = require('component-build-tools').rollup;
 
 const config = {
   buildTypes: [ rollup.BUILD_TYPES.MJS ], // Set this to any build styles you want.
@@ -34,7 +34,7 @@ module.exports = rollup.init(config);
 and
 
 ```JavaScript
-const {init, BUILD_TYPES} = require('./node_modules/component-build-tools/rollup.root.config');
+const {init, BUILD_TYPES} = require('component-build-tools').rollup;
 
 const config = {
   buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.CJS, BUILD_TYPES.CJS5 ],
@@ -393,6 +393,7 @@ The import line of code will be inserted into the top of `templates.mjs`. _You c
 
 | Date | Version | Description |
 | --- | --- | --- |
+| 06/15/2018 | 2.1.0 | &#x25cf; Moved source files to `lib` folder.<br/>&#x25cf; Added `index.js`.<br/>&#x25cf; Cleaned up documentation.<br/>&#x25cf; Now using `rollup` as a sub-object for require. Getting ready for v3.0.0. |
 | 06/11/2018 | 2.0.1 | &#x25cf; Bug fix to correctly set the name of an IIFE conversion. |
 | 06/07/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in templates. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types.<br/>&#x25cf; Added ability for `distPath` to be an object and not just a string.<br/>&#x25cf; Added and cleaned up Docs<br/>&#x25cf; Added more testing for the new code. |
 | 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. Added Travis and Code Climate. |

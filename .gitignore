@@ -1,3 +1,5 @@
 .nyc_output
 reports
 node_modules
+dumpme
+_compiled
