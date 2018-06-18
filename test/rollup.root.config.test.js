@@ -15,7 +15,7 @@ const fsMock = {
   '@noCallThru': true
 };
 
-const rollupConfig = proxyquire('../rollup.root.config.js', {
+const rollupConfig = proxyquire('../lib/rollup.root.config.js', {
   './cbtCompile': cbtCompileMock,
   'fs': fsMock
 });
@@ -273,15 +273,15 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(resp[0].plugins[0].name).to.equal('buble');
     expect(resp[1].output.format).to.equal('iife');
     expect(resp[1].output.name).to.equal('one');
-    expect(resp[1].plugins.length).to.equal(2, 'iife buble and uglify');
+    expect(resp[1].plugins.length).to.equal(2, 'iife buble and terser');
     expect(resp[1].plugins[0].name).to.equal('buble');
-    expect(resp[1].plugins[1].name).to.equal('uglify');
+    expect(resp[1].plugins[1].name).to.equal('terser');
 
     expect(resp[2].output.format).to.equal('cjs');
     expect(resp[2].plugins.length).to.equal(0);
     expect(resp[3].output.format).to.equal('cjs');
     expect(resp[3].plugins.length).to.equal(1);
-    expect(resp[3].plugins[0].name).to.equal('uglify');
+    expect(resp[3].plugins[0].name).to.equal('terser');
 
     expect(resp[4].output.format).to.equal('cjs');
     expect(resp[4].plugins.length).to.equal(1);
@@ -289,15 +289,15 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(resp[5].output.format).to.equal('cjs');
     expect(resp[5].plugins.length).to.equal(2);
     expect(resp[5].plugins[0].name).to.equal('buble');
-    expect(resp[5].plugins[1].name).to.equal('uglify');
+    expect(resp[5].plugins[1].name).to.equal('terser');
 
     expect(resp[6].output.format).to.equal('iife');
     expect(resp[6].output.name).to.equal('one');
     expect(resp[6].plugins.length).to.equal(0, 'iife');
     expect(resp[7].output.format).to.equal('iife');
     expect(resp[7].output.name).to.equal('one');
-    expect(resp[7].plugins.length).to.equal(1, 'iife and uglify');
-    expect(resp[7].plugins[0].name).to.equal('uglify');
+    expect(resp[7].plugins.length).to.equal(1, 'iife and terser');
+    expect(resp[7].plugins[0].name).to.equal('terser');
 
     expect(writtenFiles.length).to.equal(2);
     expect(writtenFiles[0].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocalesAndTemplates/one/_compiled/locales.mjs');

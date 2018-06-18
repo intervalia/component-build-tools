@@ -1,6 +1,6 @@
 # component-build-tools
 
-A set of build tools to help in the creation of components
+A set of build tools to help in the creation of components. These components can be web components or any other grouping of code to be used in the browser or in other environments like node.js.
 
 Used with [rollup](https://www.npmjs.com/package/rollup), these tools will allow you to process locale file and template files into a set of `.mjs` files that are importable in your script files.
 
@@ -10,7 +10,7 @@ For those of you that have used [gulp-component-assembler](https://www.npmjs.com
 
 You need to install the component build tools in your project:
 
-    npm install --save-dev git+https://github.com/intervalia/component-build-tools.git
+    npm install --save-dev component-build-tools
 
 You will also need to install the latest `rollup` in your project
 
@@ -18,10 +18,14 @@ You will also need to install the latest `rollup` in your project
 
 ## Usage
 
+### Config file
+
+For the component-build-tools to work with rollup you need to provide a config file named `rollup.config.js` in your project's root folder.
+
 Here are two sample `rollup.config.js` files:
 
 ```JavaScript
-const rollup = require('./node_modules/component-build-tools/rollup.root.config');
+const rollup = require('component-build-tools').components.rollup;
 
 const config = {
   buildTypes: [ rollup.BUILD_TYPES.MJS ], // Set this to any build styles you want.
@@ -34,7 +38,7 @@ module.exports = rollup.init(config);
 and
 
 ```JavaScript
-const {init, BUILD_TYPES} = require('./node_modules/component-build-tools/rollup.root.config');
+const {init, BUILD_TYPES} = require('component-build-tools').components.rollup;
 
 const config = {
   buildTypes: [ BUILD_TYPES.MJS, BUILD_TYPES.CJS, BUILD_TYPES.CJS5 ],
@@ -44,7 +48,13 @@ const config = {
 module.exports = init(config);
 ```
 
-Then, to run rollup:
+The first example will only build from the folders `assets/wc-n1` and `assets/wc-p3` and will generate two output module files in the `dist/js` folder.
+
+The second example builds module files, common JS files and common JS files that have been transpiled into ES5. Its source is any and all folders inside the `assets` folder.
+
+### Run
+
+To run rollup:
 
 ```shell
 ./node_modules/.bin/rollup -c
@@ -66,7 +76,7 @@ There are 5 build styles:
 
 ### Config options
 
-When you call `rollup.init` you pass in a set of options. Most are optional. The only one required is `srcFolders`.
+When you call `init` you pass in a set of options. Most are optional. The only one required is `srcFolders`.
 
 | Option | Type | Default Value | Description |
 | --- | --- | --- | --- |
@@ -163,15 +173,15 @@ If the value for `includePath` had been set to true then the output structure wo
 
 #### srcFolders
 
-`srcFolder` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
+`srcFolders` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
 
-If you have all of your components stored in child fodlers of the folder `./comps` then you would call `rollup.init({srcFolders:['./comps/*']})`.
+If you have all of your components stored in child folders of the folder `./comps` then you would call `init({srcFolders:['./comps/*']})`.
 
 Every folder directly under `./comps` would get processed. Any subfolder that was found to match the requirements of a component will be handed off to rollup for further processing.
 
-You can specify each folder independently within the array, And each entry in the array can either be a real path to a specific folder or a glob path to a set of folders.
+You can specify each folder independently within the array, and each entry in the array can either be a real path to a specific folder or a glob path to a set of folders.
 
-> `rollup.init({srcFolders:['./comps/component1']})` will only look at the path `./comps/component1` while `rollup.init({srcFolders:['./comps/*']})` will look at all direct child folders under `./comps`.
+> `init({srcFolders:['./comps/component1']})` will only look at the path `./comps/component1` while `init({srcFolders:['./comps/*']})` will look at all direct child folders under `./comps`.
 
 ## Locale files
 
@@ -358,7 +368,7 @@ Template file `content.html`:
 </table>
 ```
 
-If you called `templates.str('content', {size: 10})` then you would get 10 rows created. If you called `templates.str('content', {size: 87})` then you would get 87 rows created.
+If you called `templates.str('content', {size: 10})` then 10 rows would be created. If you called `templates.str('content', {size: 87})` then 87 rows would be created.
 
 You can pass in any data and use it any way your imagination can imagine. You just need to follow the rules for [template literals](http://devdocs.io/javascript/template_literals).
 
@@ -393,6 +403,7 @@ The import line of code will be inserted into the top of `templates.mjs`. _You c
 
 | Date | Version | Description |
 | --- | --- | --- |
+| 06/18/2018 | 2.1.0 | &#x25cf; Moved source files to `lib` folder.<br/>&#x25cf; Added `index.js`.<br/>&#x25cf; Added use of html-minify to improve minification of templates.<br/>&#x25cf; Cleaned up documentation.<br/>&#x25cf; Now using `components.rollup` as a sub-object for require. Getting ready for v3.0.0 and additional functionality. |
 | 06/11/2018 | 2.0.1 | &#x25cf; Bug fix to correctly set the name of an IIFE conversion. |
 | 06/07/2018 | 2.0.0 | **Breaking Changes!!**<br>&#x25cf; Removed the escaping of the back-tick in templates. This was preventing sub-ES6 Template Literals in the templates.<br/>&#x25cf; You now must list the source folders. In most cases you would change from `srcPath: "modules/src"` to `srcPath: "modules/src/*"`<br/>&#x25cf; Changed default build types from MJS and IIFE to MJS and CJS since these can both be loaded in a similar manner.<br/>&#x25cf; `addKELocale` is now `false` by default<br/>&#x25cf; `alwaysReturnFile` is now `false` by default.<br/>&#x25cf; `defaultLocaleVariable` is now set to `document.documentElement.lang` which is the value set in the `lang` attribute of the `<html>` tag: `<html lang="fr">` would use `fr` as the default value when getting the `lang` object.<br/>&#x25cf; `includePath` is now `false` by default.<br/>&#x25cf; New config options `dstExtCJS`, `dstExtCJS5`, `dstExtIIFE`, `dstExtIIFE5` and `dstExtMJS` allow you to set the output extension for the various output file types.<br/>&#x25cf; Added ability for `distPath` to be an object and not just a string.<br/>&#x25cf; Added and cleaned up Docs<br/>&#x25cf; Added more testing for the new code. |
 | 05/29/2018 | 1.1.0 | &#x25cf; Added code to allow template files to define imports they need.<br/>&#x25cf; Improved Docs. Added Travis and Code Climate. |

@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 const path = require('path');
 const expect = require('chai').expect;
-const cbtCompile = require('../cbtCompile');
+const cbtCompile = require('../lib/cbtCompile');
 const ROOT = process.cwd();
 
 function showCode(code) {
@@ -252,6 +252,20 @@ describe('Testing file cbtCompile.js', () => {
       expect(templates.str('test1')).to.equal('<div>Content for Test1</div>');
     });
 
+    it('should error for template files with other than imports', done => {
+      const config = Object.assign({}, defaultConfig);
+
+      try {
+        cbtCompile.templates(path.join(ROOT, './test/testFolders/cbtCompileFolders/withBadImports'), config);
+        done('Processed template but should not have.');
+      }
+
+      catch (ex) {
+        expect(ex.message).to.equal('Only "import" is allowed: "const a = 10"');
+        done();
+      }
+    });
+
     it('should handle bad template file name', (done) => {
       const config = Object.assign({}, defaultConfig);
 
@@ -295,7 +309,7 @@ describe('Testing file cbtCompile.js', () => {
 
       expect(templates.str('withoutStrings')).to.equal('<ol> <li>One</li> <li>Two</li> <li>Three</li> <li>Four</li> </ol>');
       expect(templates.str('withStrings')).to.equal('<div> <button>好</button> <button>取消</button> </div>');
-      expect(templates.str('withData', data)).to.equal('<div> <style> .gender { color: #666; } .gender-male { color: blue; } .gender-female { color: pink; } </style> <div class="gender gender-male">MALE</div> <div class="name">Frank N. Stein</div> </div>');
+      expect(templates.str('withData', data)).to.equal('<div> <style>.gender{color:#666}.gender-male{color:#00f}.gender-female{color:pink}</style> <div class="gender gender-male">MALE</div> <div class="name">Frank N. Stein</div> </div>');
     });
   });
 });

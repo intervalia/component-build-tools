@@ -5,17 +5,12 @@
   "check-coverage": false,
   "eager": true,
   "exclude": [
-    "test/**/*.test.js"
+    "test/*.test.js"
   ],
   "extension": [],
   "functions": 40,
   "include": [
-    "createEOTranslations.js",
-    "getFileArrayFromGlob.js",
-    "readFile.js",
-    "readTranslations.js",
-    "cbtCompile.js",
-    "rollup.root.config.js"
+    "lib/*.js"
   ],
   "instrument": true,
   "lines": 40,
