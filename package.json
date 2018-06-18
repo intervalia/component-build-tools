@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "glob": "^7.1.2",
+    "html-minifier": "^3.5.16",
     "rollup": "^0.60.7",
     "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-terser": "^1.0.1"

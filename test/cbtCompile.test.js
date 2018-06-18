@@ -295,7 +295,7 @@ describe('Testing file cbtCompile.js', () => {
 
       expect(templates.str('withoutStrings')).to.equal('<ol> <li>One</li> <li>Two</li> <li>Three</li> <li>Four</li> </ol>');
       expect(templates.str('withStrings')).to.equal('<div> <button>好</button> <button>取消</button> </div>');
-      expect(templates.str('withData', data)).to.equal('<div> <style> .gender { color: #666; } .gender-male { color: blue; } .gender-female { color: pink; } </style> <div class="gender gender-male">MALE</div> <div class="name">Frank N. Stein</div> </div>');
+      expect(templates.str('withData', data)).to.equal('<div> <style>.gender{color:#666}.gender-male{color:#00f}.gender-female{color:pink}</style> <div class="gender gender-male">MALE</div> <div class="name">Frank N. Stein</div> </div>');
     });
   });
 });
