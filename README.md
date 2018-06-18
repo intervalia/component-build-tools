@@ -175,11 +175,11 @@ If the value for `includePath` had been set to true then the output structure wo
 
 `srcFolders` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
 
-If you have all of your components stored in child fodlers of the folder `./comps` then you would call `init({srcFolders:['./comps/*']})`.
+If you have all of your components stored in child folders of the folder `./comps` then you would call `init({srcFolders:['./comps/*']})`.
 
 Every folder directly under `./comps` would get processed. Any subfolder that was found to match the requirements of a component will be handed off to rollup for further processing.
 
-You can specify each folder independently within the array, And each entry in the array can either be a real path to a specific folder or a glob path to a set of folders.
+You can specify each folder independently within the array, and each entry in the array can either be a real path to a specific folder or a glob path to a set of folders.
 
 > `init({srcFolders:['./comps/component1']})` will only look at the path `./comps/component1` while `init({srcFolders:['./comps/*']})` will look at all direct child folders under `./comps`.
 
