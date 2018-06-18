@@ -252,6 +252,20 @@ describe('Testing file cbtCompile.js', () => {
       expect(templates.str('test1')).to.equal('<div>Content for Test1</div>');
     });
 
+    it('should error for template files with other than imports', done => {
+      const config = Object.assign({}, defaultConfig);
+
+      try {
+        cbtCompile.templates(path.join(ROOT, './test/testFolders/cbtCompileFolders/withBadImports'), config);
+        done('Processed template but should not have.');
+      }
+
+      catch (ex) {
+        expect(ex.message).to.equal('Only "import" is allowed: "const a = 10"');
+        done();
+      }
+    });
+
     it('should handle bad template file name', (done) => {
       const config = Object.assign({}, defaultConfig);
 
