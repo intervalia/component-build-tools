@@ -173,7 +173,7 @@ If the value for `includePath` had been set to true then the output structure wo
 
 #### srcFolders
 
-`srcFolder` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
+`srcFolders` is the only option that must be supplied. This specifies the folder or folders that are to be processed by the build tools.
 
 If you have all of your components stored in child fodlers of the folder `./comps` then you would call `init({srcFolders:['./comps/*']})`.
 
