@@ -1,6 +1,6 @@
 {
   "name": "component-build-tools",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A set of build tools to simplify the creation of components",
   "main": "index.js",
   "author": "Michael G Collins <intervalia@gmail.com> http://www.intervalia.com/",
@@ -39,6 +39,7 @@
   "scripts": {
     "debug": "mocha --inspect-brk test/**/*.test.js",
     "lint": "eslint \"*.js\" \"test/*.js\"",
-    "test": "npm run lint && bin/unit-tests"
+    "mocha-test": "nyc --nycrc-path test/.nycrc-server.json ./node_modules/.bin/_mocha test/*.test.js",
+    "test": "npm run lint && npm run mocha-test"
   }
 }

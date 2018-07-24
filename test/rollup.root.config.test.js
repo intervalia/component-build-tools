@@ -20,6 +20,9 @@ const rollupConfig = proxyquire('../lib/rollup.root.config.js', {
   'fs': fsMock
 });
 
+// Fix the generated paths on a windows machine to use '/' and not '\' so the tests will work correctly
+const fixWindowsPath = str => str.replace(/\\/g, '/');
+
 var writtenFiles = [];
 
 const ROOT = process.cwd();
@@ -169,14 +172,14 @@ describe('Testing file `rollup.root.config.js`', () => {
     });
 
     expect(resp.length).to.equal(2);
-    expect(resp[0].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
+    expect(fixWindowsPath(resp[0].input).split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[0].output.format).to.equal('es');
     expect(resp[0].output.sourcemap).to.equal(false);
-    expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.mjs');
-    expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
+    expect(fixWindowsPath(resp[0].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.mjs');
+    expect(fixWindowsPath(resp[1].input).split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[1].output.format).to.equal('cjs');
     expect(resp[1].output.sourcemap).to.equal(false);
-    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.cjs.js');
+    expect(fixWindowsPath(resp[1].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.cjs.js');
     expect(writtenFiles.length).to.equal(0);
   });
 
@@ -192,12 +195,12 @@ describe('Testing file `rollup.root.config.js`', () => {
     });
 
     expect(resp.length).to.equal(2);
-    expect(resp[0].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
+    expect(fixWindowsPath(resp[0].input).split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[0].output.format).to.equal('es');
-    expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/mjs/one.js');
-    expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
+    expect(fixWindowsPath(resp[0].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/mjs/one.js');
+    expect(fixWindowsPath(resp[1].input).split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[1].output.format).to.equal('cjs');
-    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/cjs/one.js');
+    expect(fixWindowsPath(resp[1].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/cjs/one.js');
     expect(writtenFiles.length).to.equal(0);
   });
 
@@ -209,14 +212,14 @@ describe('Testing file `rollup.root.config.js`', () => {
     });
 
     expect(resp.length).to.equal(2);
-    expect(resp[0].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
+    expect(fixWindowsPath(resp[0].input).split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[0].output.format).to.equal('es');
     expect(resp[0].output.sourcemap).to.equal('inline');
-    expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.mjs');
-    expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
+    expect(fixWindowsPath(resp[0].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.mjs');
+    expect(fixWindowsPath(resp[1].input).split('test/testFolders')[1]).to.equal('/rollupFolders/onlyOneMJS/one/one.mjs');
     expect(resp[1].output.format).to.equal('cjs');
     expect(resp[1].output.sourcemap).to.equal('inline');
-    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.cjs.js');
+    expect(fixWindowsPath(resp[1].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one.cjs.js');
     expect(writtenFiles.length).to.equal(0);
   });
 
@@ -230,16 +233,16 @@ describe('Testing file `rollup.root.config.js`', () => {
     });
 
     expect(resp.length).to.equal(2);
-    expect(resp[0].input.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/one.mjs');
+    expect(fixWindowsPath(resp[0].input).split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/one.mjs');
     expect(resp[0].output.format).to.equal('es');
     expect(resp[0].output.sourcemap).to.equal(true);
-    expect(resp[0].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.mjs');
-    expect(resp[1].input.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/one.mjs');
+    expect(fixWindowsPath(resp[0].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.mjs');
+    expect(fixWindowsPath(resp[1].input).split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/one.mjs');
     expect(resp[1].output.format).to.equal('cjs');
     expect(resp[1].output.sourcemap).to.equal(true);
-    expect(resp[1].output.file.split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.cjs.js');
+    expect(fixWindowsPath(resp[1].output.file).split('test/testFolders')[1]).to.equal('/rollupFolders/dist/one/one.cjs.js');
     expect(writtenFiles.length).to.equal(1);
-    expect(writtenFiles[0].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/_compiled/locales.mjs');
+    expect(fixWindowsPath(writtenFiles[0].file).split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocales/one/_compiled/locales.mjs');
 
     let results = writtenFiles[0].data.replace('export default', 'return');
 
@@ -300,8 +303,8 @@ describe('Testing file `rollup.root.config.js`', () => {
     expect(resp[7].plugins[0].name).to.equal('terser');
 
     expect(writtenFiles.length).to.equal(2);
-    expect(writtenFiles[0].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocalesAndTemplates/one/_compiled/locales.mjs');
-    expect(writtenFiles[1].file.split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocalesAndTemplates/one/_compiled/templates.mjs');
+    expect(fixWindowsPath(writtenFiles[0].file).split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocalesAndTemplates/one/_compiled/locales.mjs');
+    expect(fixWindowsPath(writtenFiles[1].file).split('test/testFolders')[1]).to.equal('/rollupFolders/MJSWithLocalesAndTemplates/one/_compiled/templates.mjs');
 
     let results = writtenFiles[0].data.replace('export default', 'return');
 
