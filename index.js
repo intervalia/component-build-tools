@@ -1,9 +1,12 @@
 var { init, BUILD_TYPES } = require('./lib/rollup.root.config');
+var {locales, templates} = require('./lib/build');
 
 module.exports = {
-  init, // Deprecated in 2.1.0 - To be removed in 3.0
-  BUILD_TYPES, // Deprecated in 2.1.0 - To be removed in 3.0
   components: {
+    build: {
+      locales,
+      templates
+    },
     rollup: {
       init,
       BUILD_TYPES

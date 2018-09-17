@@ -7,17 +7,17 @@ const cbtCompileMock = {};
 const fsMock = {
   'existsSync': file => true,
   'lstatSync': fsOriginal.lstatSync,
-  'mkdirSync': file => 0o777,
   'readdirSync': fsOriginal.readdirSync,
-  'renameSync': (fName, tName) => undefined, // eslint-disable-line no-undefined
-  'writeFileSync': (file, data) => writtenFiles.push({file, data}),
-  'unlinkSync': file => undefined, // eslint-disable-line no-undefined
   '@noCallThru': true
+};
+const writeFileMock = (filePath, content, makeBak) => {
+  writtenFiles.push({file: filePath, data: content});
 };
 
 const rollupConfig = proxyquire('../lib/rollup.root.config.js', {
   './cbtCompile': cbtCompileMock,
-  'fs': fsMock
+  'fs': fsMock,
+  './writeFile': writeFileMock
 });
 
 // Fix the generated paths on a windows machine to use '/' and not '\' so the tests will work correctly
